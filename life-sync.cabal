@@ -1,5 +1,5 @@
 name:                life-sync
-version:             0.1.0.0
+version:             1.0
 description:         Synchronize personal configs across multiple machines
 homepage:            https://github.com/ChShersh/life-sync
 bug-reports:         https://github.com/ChShersh/life-sync/issues
@@ -9,19 +9,23 @@ author:              Dmitry Kovanikov
 maintainer:          kovanikov@gmail.com
 copyright:           2017 Dmitry Kovanikov
 category:            Configuration
+stability:           experimental
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
-tested-with:         GHC == 8.2.1
+tested-with:         GHC == 8.0.2
 
 library
   hs-source-dirs:      src
 
   exposed-modules:     Life.Configuration
 
-
   build-depends:       base
+                     , containers
+                     , fmt
                      , path
+                     , path-io
+                     , toml-parser
                      , universum
 
   ghc-options:         -Wall
