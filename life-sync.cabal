@@ -19,12 +19,16 @@ library
   hs-source-dirs:      src
 
   exposed-modules:     Life.Configuration
+                       Life.Github
+                       Life.Shell
+                       Life.Main.Init
 
   build-depends:       base
                      , containers
                      , fmt
                      , path
                      , path-io
+                     , process
                      , toml-parser
                      , universum
 

@@ -2,11 +2,10 @@ module Main where
 
 import Universum
 
-import Life.Configuration (LifeConfiguration (..))
+import Life.Main.Init (initLife)
 
-import Options (LifeCommand (..), parseCommand)
+import Options (InitOptions (..), LifeCommand (..), parseCommand)
 
 main :: IO ()
 main = parseCommand >>= \case
-    Init _ -> putText "Hello!"
-    _      -> putText "Bye!!!"
+    Init InitOptions{..} -> initLife initOptionsOwner

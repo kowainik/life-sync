@@ -15,6 +15,8 @@ import Options.Applicative (Parser, ParserInfo, auto, command, execParser, flag'
                             helper, info, long, metavar, option, progDesc, short, showDefault,
                             strArgument, strOption, subparser, switch, value)
 
+import Life.Github (Owner (..))
+
 data LifeCommand
     = Init InitOptions
 --    | Sync SyncOptions
@@ -22,14 +24,14 @@ data LifeCommand
     deriving (Show)
 
 data InitOptions = InitOptions
-     { initOptionsRepository :: Text
+     { initOptionsOwner :: Owner
      } deriving (Show)
 
 commandParser :: Parser LifeCommand
 commandParser = subparser $
     command "init"
             (info (helper <*> fmap Init initOptionsParser)
-                  (fullDesc <> progDesc "Initialize."))
+                  (fullDesc <> progDesc "Initialize GitHub repository named 'dotfiles' if you don't have one."))
 -- <> command "cache"
 --            (info (helper <*> cacheParser)
 --                  (fullDesc <> progDesc
@@ -38,9 +40,10 @@ commandParser = subparser $
 
 initOptionsParser :: Parser InitOptions
 initOptionsParser = do
-    initOptionsRepository <- strArgument
-      $ metavar "REPO"
-     <> help "Repository to sync with"
+    initOptionsOwner <- fmap Owner
+      $ strArgument
+      $ metavar "OWNER"
+     <> help "Your github user name"
     pure InitOptions{..}
 
 optionsInfo :: ParserInfo LifeCommand
