@@ -1,7 +1,7 @@
 -- | Contains function to create repository.
 
 module Life.Main.Init
-       ( initLife
+       ( lifeInit
        ) where
 
 import Universum
@@ -12,8 +12,8 @@ import Life.Github (Owner, Repo (Repo), createRepository, repoName)
 import Life.Shell (createDirInHome)
 
 -- TODO: use list of some predefined files and directories
-initLife :: Owner -> IO ()
-initLife owner = do
+lifeInit :: Owner -> IO ()
+lifeInit owner = do
     repoPath <- createDirInHome repoName
     withCurrentDir repoPath $
         createRepository owner (Repo "dotfiles")

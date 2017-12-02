@@ -2,10 +2,12 @@ module Main where
 
 import Universum
 
-import Life.Main.Init (initLife)
+import Life.Main.Init (lifeInit)
+import Life.Main.Update (lifeAdd)
 
-import Options (InitOptions (..), LifeCommand (..), parseCommand)
+import Options (AddOptions (..), InitOptions (..), LifeCommand (..), parseCommand)
 
 main :: IO ()
 main = parseCommand >>= \case
-    Init InitOptions{..} -> initLife initOptionsOwner
+    Init InitOptions{..} -> lifeInit initOptionsOwner
+    Add  AddOptions{..}  -> lifeAdd  addOptionsFile

@@ -22,10 +22,12 @@ library
                        Life.Github
                        Life.Shell
                        Life.Main.Init
+                       Life.Main.Update
 
   build-depends:       base
                      , containers
                      , fmt
+                     , microlens-platform
                      , path
                      , path-io
                      , process

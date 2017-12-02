@@ -1,22 +1,39 @@
-{-# LANGUAGE ExplicitForAll      #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell     #-}
+{-# LANGUAGE ExplicitForAll         #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
+{-# LANGUAGE ScopedTypeVariables    #-}
+{-# LANGUAGE TemplateHaskell        #-}
 
 -- | Contains configuration data type.
 
 module Life.Configuration
        ( LifeConfiguration  (..)
+       , singleDirConfig
+       , singleFileConfig
+
+         -- * Parsing exceptions
        , ParseLifeException (..)
+
+         -- * Path to life
        , lifePath
-       , parseLifeConfiguration
-       , renderLifeConfiguration
+
+         -- * Lenses for 'LifeConfiguration'
+       , files
+       , directories
+
+         -- * Parse and render 'LifeConfiguration' under `~/.life`
+       , parseGlobalLife
+       , writeGlobalLife
        ) where
 
-import Universum
+import Universum hiding ((<>))
 
 import Control.Exception.Base (throwIO)
 import Data.List (lookup)
+import Data.Semigroup ((<>))
 import Fmt (indentF, unlinesF, (+|), (|++|))
+import Lens.Micro.Platform (makeFields)
 import Path (Dir, File, Path, PathException, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile,
              toFilePath, (</>))
 import Path.IO (getHomeDir)
@@ -24,10 +41,44 @@ import TOML (Value (..), parseTOML)
 
 import qualified Data.Set as Set
 
+----------------------------------------------------------------------------
+-- Life Configuration data type with lenses
+----------------------------------------------------------------------------
+
 data LifeConfiguration = LifeConfiguration
      { lifeConfigurationFiles       :: Set (Path Rel File)
      , lifeConfigurationDirectories :: Set (Path Rel Dir)
      } deriving (Show)
+
+-- | Name for life configuration file.
+lifePath :: Path Rel File
+lifePath = $(mkRelFile ".life")
+
+makeFields ''LifeConfiguration
+
+----------------------------------------------------------------------------
+-- Algebraic instances and utilities
+----------------------------------------------------------------------------
+
+instance Semigroup LifeConfiguration where
+    life1 <> life2 = LifeConfiguration
+        { lifeConfigurationFiles       = life1^.files <> life2^.files
+        , lifeConfigurationDirectories = life1^.directories <> life2^.directories
+        }
+
+instance Monoid LifeConfiguration where
+    mempty  = LifeConfiguration mempty mempty
+    mappend = (<>)
+
+singleFileConfig :: Path Rel File -> LifeConfiguration
+singleFileConfig file = mempty & files .~ one file
+
+singleDirConfig :: Path Rel Dir -> LifeConfiguration
+singleDirConfig dir = mempty & directories .~ one dir
+
+----------------------------------------------------------------------------
+-- Life configuration renderer
+----------------------------------------------------------------------------
 
 -- | Converts 'LifeConfiguration' into TOML file.
 renderLifeConfiguration :: LifeConfiguration -> Text
@@ -49,9 +100,18 @@ renderLifeConfiguration LifeConfiguration{..} = mconcat
                             |++| indentF n (unlinesF (map (", " ++) xs)
                               +| "]")
 
+writeGlobalLife :: LifeConfiguration -> IO ()
+writeGlobalLife config = do
+    homeDirPath <- getHomeDir
+    let lifeFilePath = homeDirPath </> lifePath
+    writeFile (fromAbsFile lifeFilePath) (renderLifeConfiguration config)
+
+----------------------------------------------------------------------------
+-- Life configuration parsing
+----------------------------------------------------------------------------
+
 data ParseLifeException = AbsentKeyError Text
                         | WrongTomlError Text
-                        | PathParseError PathException
      deriving (Show, Typeable)
 
 instance Exception ParseLifeException
@@ -72,21 +132,17 @@ withStringList key toml = case lookup key toml of
 
 parseConfigFromToml :: MonadThrow m => [(Text, Value)] -> m LifeConfiguration
 parseConfigFromToml toml = do
-    files       <- withStringList "files"       toml
-    directories <- withStringList "directories" toml
+    lifeFiles <- withStringList "files"       toml
+    lifeDirs  <- withStringList "directories" toml
 
-    filePaths <- mapM parseRelFile files
-    dirPaths  <- mapM parseRelDir  directories
+    filePaths <- mapM parseRelFile lifeFiles
+    dirPaths  <- mapM parseRelDir  lifeDirs
 
     return $ LifeConfiguration (Set.fromList filePaths) (Set.fromList dirPaths)
 
--- | Name for life configuration file.
-lifePath :: Path Rel File
-lifePath = $(mkRelFile ".life")
-
 -- | Reads 'LifeConfiguration' from @~\/.life@ file.
-parseLifeConfiguration :: IO LifeConfiguration
-parseLifeConfiguration = do
+parseGlobalLife :: IO LifeConfiguration
+parseGlobalLife = do
     homeDirPath <- getHomeDir
     lifeToml    <- readFile (fromAbsFile $ homeDirPath </> lifePath)
     either throwIO parseConfigFromToml $ parseTOML lifeToml
