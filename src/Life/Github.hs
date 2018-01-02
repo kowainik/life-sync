@@ -30,10 +30,10 @@ newtype Repo  = Repo  { getRepo  :: Text } deriving (Show)
 ----------------------------------------------------------------------------
 
 -- | Make a commit and push it.
-pushka :: IO ()
-pushka = do
+pushka :: Text -> IO ()
+pushka commitMsg = do
     "git" ["add", "."]
-    "git" ["commit", "-m", "Create the project"]
+    "git" ["commit", "-m", commitMsg]
     "git" ["push", "-u", "origin", "master"]
 
 -- | Creates repository on GitHub inside given folder.
@@ -42,7 +42,7 @@ createRepository (Owner owner) (Repo repo) = do
     let description = ":computer: Configuration files"
     "git" ["init"]
     "hub" ["create", "-d", description, owner <> "/" <> repo]
-    pushka
+    pushka "Create the project"
 
 ----------------------------------------------------------------------------
 -- dotfiles workflow
@@ -59,18 +59,18 @@ insideRepo action = do
     withCurrentDir repoPath action
 
 -- | Commits all changes inside 'repoName' and pushes to remote.
-pushRepo :: IO ()
-pushRepo = insideRepo pushka
+pushRepo :: Text -> IO ()
+pushRepo = insideRepo . pushka
 
 ----------------------------------------------------------------------------
 -- File manipulation
 ----------------------------------------------------------------------------
 
-updateDotfilesRepo :: LifeConfiguration -> IO ()
-updateDotfilesRepo LifeConfiguration{..} = do
+updateDotfilesRepo :: Text -> LifeConfiguration -> IO ()
+updateDotfilesRepo commitMsg LifeConfiguration{..} = do
     copyFiles (toList lifeConfigurationFiles)
     copyDirs  (toList lifeConfigurationDirectories)
-    pushRepo
+    pushRepo commitMsg
 
 -- | Copy files to repository and push changes to remote repository.
 copyFiles :: [Path Rel File] -> IO ()
