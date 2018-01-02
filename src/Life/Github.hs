@@ -5,8 +5,11 @@ module Life.Github
        ( Owner (..)
        , Repo  (..)
 
+         -- * Repository utils
        , repoName
+       , insideRepo
 
+         -- * Repository manipulation commands
        , createRepository
        , updateDotfilesRepo
        ) where
@@ -17,7 +20,7 @@ import Path (Abs, Dir, File, Path, Rel, mkRelDir, (</>))
 import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 
 import Life.Configuration (LifeConfiguration (..))
-import Life.Shell ()
+import Life.Shell (relativeToHome)
 
 newtype Owner = Owner { getOwner :: Text } deriving (Show)
 newtype Repo  = Repo  { getRepo  :: Text } deriving (Show)
@@ -51,7 +54,9 @@ repoName = $(mkRelDir "dotfiles/")
 
 -- | Executes action with 'repoName' set as pwd.
 insideRepo :: (MonadIO m, MonadMask m) => m a -> m a
-insideRepo = withCurrentDir repoName
+insideRepo action = do
+    repoPath <- relativeToHome repoName
+    withCurrentDir repoPath action
 
 -- | Commits all changes inside 'repoName' and pushes to remote.
 pushRepo :: IO ()

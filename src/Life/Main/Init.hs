@@ -6,14 +6,24 @@ module Life.Main.Init
 
 import Universum
 
-import Path.IO (withCurrentDir)
+import Path.IO (copyFile)
 
-import Life.Github (Owner, Repo (Repo), createRepository, repoName)
-import Life.Shell (createDirInHome)
+import Life.Configuration (lifePath, singleFileConfig, writeGlobalLife)
+import Life.Github (Owner, Repo (Repo), createRepository, insideRepo, repoName)
+import Life.Shell (createDirInHome, relativeToHome)
 
--- TODO: use list of some predefined files and directories
 lifeInit :: Owner -> IO ()
 lifeInit owner = do
-    repoPath <- createDirInHome repoName
-    withCurrentDir repoPath $
+    -- create initial life configuration
+    -- TODO: check for .life existence
+    lifeFilePath  <- relativeToHome lifePath
+    let lifeConfig = singleFileConfig lifePath
+    writeGlobalLife lifeConfig
+
+    -- create dotfiles repository
+    -- TODO: check for dotfiles existence
+    () <$ createDirInHome repoName
+    insideRepo $ do
+        -- TODO: use list of some predefined files and directories
+        copyFile lifeFilePath lifePath
         createRepository owner (Repo "dotfiles")

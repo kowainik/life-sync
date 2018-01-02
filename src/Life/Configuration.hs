@@ -32,12 +32,14 @@ import Universum hiding ((<>))
 import Control.Exception.Base (throwIO)
 import Data.List (lookup)
 import Data.Semigroup ((<>))
-import Fmt (indentF, unlinesF, (+|), (|++|))
+import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
-import Path (Dir, File, Path, PathException, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile,
-             toFilePath, (</>))
+import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, toFilePath,
+             (</>))
 import Path.IO (getHomeDir)
 import TOML (Value (..), parseTOML)
+
+import Life.Shell (relativeToHome)
 
 import qualified Data.Set as Set
 
@@ -91,19 +93,19 @@ renderLifeConfiguration LifeConfiguration{..} = mconcat
     render :: Text -> Set (Path b t) -> Text
     render key paths = do
         let prefix = key <> " = "
-        let array  = renderStringArray (length prefix) (map toFilePath $ toList paths)
+        let array  = renderStringArray (length prefix) (map show $ toList paths)
         prefix <> array
 
     renderStringArray :: Int -> [String] -> Text
     renderStringArray _ []     = "[]"
-    renderStringArray n (x:xs) = "[ " +| x
-                            |++| indentF n (unlinesF (map (", " ++) xs)
-                              +| "]")
+--    renderStringArray n [x]    = "[ " +| x |+ " ]"
+    renderStringArray n (x:xs) = "[ " +| x |+ "\n"
+                              +| indentF n (unlinesF (map (", " ++) xs ++ ["]"]))
+                              |+ ""
 
 writeGlobalLife :: LifeConfiguration -> IO ()
 writeGlobalLife config = do
-    homeDirPath <- getHomeDir
-    let lifeFilePath = homeDirPath </> lifePath
+    lifeFilePath <- relativeToHome lifePath
     writeFile (fromAbsFile lifeFilePath) (renderLifeConfiguration config)
 
 ----------------------------------------------------------------------------

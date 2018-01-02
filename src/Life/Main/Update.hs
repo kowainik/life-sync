@@ -14,6 +14,9 @@ import Life.Github (updateDotfilesRepo)
 -- | Add path to existing life-configuration file.
 lifeAdd :: FilePath -> IO ()
 lifeAdd path = do
+    -- TODO: check for .life existence
+    -- TODO: check for dotfiles existence
+
     homeDirPath <- getHomeDir
     filePath    <- resolveFile homeDirPath path
     dirPath     <- resolveDir  homeDirPath path
@@ -31,7 +34,7 @@ lifeAdd path = do
                  relativeDir <- makeRelative homeDirPath dirPath
                  pure $ singleDirConfig relativeDir
              else do
-                 putText $ toText path <> " is neither file nor directory"
+                 putText $ toText path <> " is neither file nor directory or just doesn't exist"
                  pure mempty
 
     let newConfiguration = configuration <> toAdd

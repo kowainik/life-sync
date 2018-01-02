@@ -7,6 +7,7 @@
 
 module Life.Shell
        ( createDirInHome
+       , relativeToHome
        ) where
 
 import Universum
@@ -22,6 +23,11 @@ instance (a ~ Text, b ~ ()) => IsString ([a] -> IO b) where
 -- | Creates directory with name "folder" under "~/folder".
 createDirInHome :: Path Rel Dir -> IO (Path Abs Dir)
 createDirInHome dirName = do
-    homeDir <- getHomeDir
-    let newDir = homeDir </> dirName
+    newDir <- relativeToHome dirName
     newDir <$ createDirIfMissing False newDir
+
+-- | Creates path relative to home directory
+relativeToHome :: MonadIO m => Path Rel t -> m (Path Abs t)
+relativeToHome path = do
+    homeDir <- getHomeDir
+    pure $ homeDir </> path
