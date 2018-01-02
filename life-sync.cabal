@@ -13,7 +13,7 @@ stability:           experimental
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
-tested-with:         GHC == 8.0.2
+tested-with:         GHC == 8.2.1
 
 library
   hs-source-dirs:      src
@@ -32,7 +32,7 @@ library
                      , path-io
                      , process
                      , toml-parser
-                     , universum
+                     , universum >= 1.0.0
 
   ghc-options:         -Wall
   default-language:    Haskell2010
