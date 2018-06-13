@@ -13,6 +13,7 @@ stability:           experimental
 build-type:          Simple
 cabal-version:       2.0
 tested-with:         GHC == 8.2.2
+                   , GHC == 8.4.3
 extra-doc-files:     README.md
                    , CHANGELOG.md
 

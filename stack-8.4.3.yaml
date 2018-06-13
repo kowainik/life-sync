@@ -1,8 +1,11 @@
-resolver: nightly
+resolver: nightly-2018-06-13
 
 extra-deps:
 - base-noprelude-4.11.1.0
+- fmt-0.6
 - toml-parser-0.1.0.0
+
+allow-newer: true
 
 ghc-options:
   "$locals": -fhide-source-paths

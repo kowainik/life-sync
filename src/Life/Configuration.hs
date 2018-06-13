@@ -28,7 +28,6 @@ module Life.Configuration
        ) where
 
 import Control.Exception.Base (throwIO)
-import Data.Semigroup ((<>))
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
 import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, (</>))
