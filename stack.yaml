@@ -2,7 +2,7 @@ resolver: lts-11.13
 
 extra-deps:
 - base-noprelude-4.10.1.0
-- toml-parser-0.1.0.0
+- tomland-0.2.1
 - universum-1.2.0
 
 ghc-options:

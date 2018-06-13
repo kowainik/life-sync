@@ -1,4 +1,4 @@
-{-# LANGUAGE ExplicitForAll         #-}
+{-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
@@ -12,8 +12,8 @@ module Life.Configuration
        , singleDirConfig
        , singleFileConfig
 
-         -- * Parsing exceptions
-       , ParseLifeException (..)
+--         -- * Parsing exceptions
+--       , ParseLifeException (..)
 
          -- * Path to life
        , lifePath
@@ -30,14 +30,14 @@ module Life.Configuration
 import Control.Exception.Base (throwIO)
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
-import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, (</>))
-import Path.IO (getHomeDir)
-import TOML (Value (..), parseTOML)
+import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, toFilePath)
+import Toml (BiToml, Valuer (..), (.=))
 
 import Life.Shell (relativeToHome)
 
-import qualified Data.List as List
 import qualified Data.Set as Set
+import qualified Text.Show as Show
+import qualified Toml
 
 ----------------------------------------------------------------------------
 -- Life Configuration data type with lenses
@@ -75,9 +75,33 @@ singleDirConfig :: Path Rel Dir -> LifeConfiguration
 singleDirConfig dir = mempty & directories .~ one dir
 
 ----------------------------------------------------------------------------
--- Life configuration renderer
+-- Toml parser for life configuration
 ----------------------------------------------------------------------------
 
+data CorpseConfiguration = CorpseConfiguration
+    { corpseFiles       :: [FilePath]
+    , corpseDirectories :: [FilePath]
+    }
+
+corpseConfiguationT :: BiToml CorpseConfiguration
+corpseConfiguationT = CorpseConfiguration
+    <$> Toml.arrayOf stringV "files"       .= corpseFiles
+    <*> Toml.arrayOf stringV "directories" .= corpseDirectories
+  where
+    stringV :: Valuer 'Toml.TString String
+    stringV = Valuer (Toml.matchText >=> pure . toString) (Toml.String . toText)
+
+resurrect :: CorpseConfiguration -> IO LifeConfiguration
+resurrect CorpseConfiguration{..} = do
+    filePaths <- mapM parseRelFile corpseFiles
+    dirPaths  <- mapM parseRelDir  corpseDirectories
+
+    pure $ LifeConfiguration
+        { lifeConfigurationFiles = Set.fromList filePaths
+        , lifeConfigurationDirectories = Set.fromList dirPaths
+        }
+
+-- TODO: should tomland one day support this?...
 -- | Converts 'LifeConfiguration' into TOML file.
 renderLifeConfiguration :: LifeConfiguration -> Text
 renderLifeConfiguration LifeConfiguration{..} = mconcat
@@ -94,7 +118,6 @@ renderLifeConfiguration LifeConfiguration{..} = mconcat
 
     renderStringArray :: Int -> [String] -> Text
     renderStringArray _ []     = "[]"
---    renderStringArray n [x]    = "[ " +| x |+ " ]"
     renderStringArray n (x:xs) = "[ " +| x |+ "\n"
                               +| indentF n (unlinesF (map (", " ++) xs ++ ["]"]))
                               |+ ""
@@ -108,39 +131,18 @@ writeGlobalLife config = do
 -- Life configuration parsing
 ----------------------------------------------------------------------------
 
-data ParseLifeException = AbsentKeyError Text
-                        | WrongTomlError Text
-     deriving (Show, Typeable)
-
-instance Exception ParseLifeException
-
-wrongValueError :: Text -> Value -> ParseLifeException
-wrongValueError key value = WrongTomlError $
-    "Expecting List for key '" <> key <> "' but found: " <> show value
-
-withStringList :: forall m . MonadThrow m => Text -> [(Text, Value)] -> m [String]
-withStringList key toml = case List.lookup key toml of
-    Nothing          -> throwM $ AbsentKeyError key
-    Just (List vals) -> traverse ensureString vals
-    Just val         -> throwM $ wrongValueError key val
-  where
-    ensureString :: Value -> m String
-    ensureString (String t) = pure $ toString t
-    ensureString value      = throwM $ wrongValueError key value
-
-parseConfigFromToml :: MonadThrow m => [(Text, Value)] -> m LifeConfiguration
-parseConfigFromToml toml = do
-    lifeFiles <- withStringList "files"       toml
-    lifeDirs  <- withStringList "directories" toml
-
-    filePaths <- mapM parseRelFile lifeFiles
-    dirPaths  <- mapM parseRelDir  lifeDirs
-
-    return $ LifeConfiguration (Set.fromList filePaths) (Set.fromList dirPaths)
-
 -- | Reads 'LifeConfiguration' from @~\/.life@ file.
 parseGlobalLife :: IO LifeConfiguration
 parseGlobalLife = do
-    homeDirPath <- getHomeDir
-    lifeToml    <- readFile (fromAbsFile $ homeDirPath </> lifePath)
-    either throwIO parseConfigFromToml $ parseTOML lifeToml
+    lifeFilePath <- relativeToHome lifePath
+    tomlText     <- readFile $ fromAbsFile lifeFilePath
+    case Toml.decode corpseConfiguationT tomlText of
+        Left err -> throwIO $ LoadTomlException (toFilePath lifeFilePath) $ Toml.prettyException err
+        Right cfg -> resurrect cfg
+
+data LoadTomlException = LoadTomlException FilePath Text
+
+instance Show.Show LoadTomlException where
+    show (LoadTomlException filePath msg) = "Couldnt parse file " ++ filePath ++ ": " ++ show msg
+
+instance Exception LoadTomlException
