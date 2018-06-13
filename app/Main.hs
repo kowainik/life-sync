@@ -1,7 +1,5 @@
 module Main where
 
-import Universum
-
 import Life.Main.Init (lifeInit)
 import Life.Main.Update (lifeAdd)
 

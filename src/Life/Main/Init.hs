@@ -4,8 +4,6 @@ module Life.Main.Init
        ( lifeInit
        ) where
 
-import Universum
-
 import Path.IO (copyFile)
 
 import Life.Configuration (lifePath, singleFileConfig, writeGlobalLife)

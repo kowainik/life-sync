@@ -27,20 +27,17 @@ module Life.Configuration
        , writeGlobalLife
        ) where
 
-import Universum hiding ((<>))
-
 import Control.Exception.Base (throwIO)
-import Data.List (lookup)
 import Data.Semigroup ((<>))
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
-import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, toFilePath,
-             (</>))
+import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, (</>))
 import Path.IO (getHomeDir)
 import TOML (Value (..), parseTOML)
 
 import Life.Shell (relativeToHome)
 
+import qualified Data.List as List
 import qualified Data.Set as Set
 
 ----------------------------------------------------------------------------
@@ -123,7 +120,7 @@ wrongValueError key value = WrongTomlError $
     "Expecting List for key '" <> key <> "' but found: " <> show value
 
 withStringList :: forall m . MonadThrow m => Text -> [(Text, Value)] -> m [String]
-withStringList key toml = case lookup key toml of
+withStringList key toml = case List.lookup key toml of
     Nothing          -> throwM $ AbsentKeyError key
     Just (List vals) -> traverse ensureString vals
     Just val         -> throwM $ wrongValueError key val

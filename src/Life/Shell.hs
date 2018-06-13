@@ -10,8 +10,6 @@ module Life.Shell
        , relativeToHome
        ) where
 
-import Universum
-
 import Path (Abs, Dir, Path, Rel, (</>))
 import Path.IO (createDirIfMissing, getHomeDir)
 import System.Process (callCommand, showCommandForUser)
