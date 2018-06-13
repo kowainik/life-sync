@@ -1,28 +1,51 @@
-# Use new container infrastructure to enable caching
-sudo: false
+sudo: true
+language: haskell
 
-# Choose a lightweight base image; we provide our own build tools.
-language: c
+git:
+  depth: 5
 
-# GHC depends on GMP. You can add other dependencies here as well.
-addons:
-  apt:
-    packages:
-    - libgmp-dev
-
-before_install:
-# Download and unpack the stack executable
-- mkdir -p ~/.local/bin
-- export PATH=$HOME/.local/bin:$PATH
-- travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
-
-# This line does all of the work: installs GHC if necessary, builds the
-# library, executables, and test suites, and runs the test suites.
-# `--no-terminal works` around some quirks in Travis's terminal implementation.
-script: stack --no-terminal --install-ghc test
-
-# Caching so the next build will be fast too.
 cache:
   directories:
-  - $HOME/.stack
-  - $HOME/build/ChShersh/life-sync/.stack-work
+  - "$HOME/.stack"
+  - "$HOME/build/kowainik/life-sync/.stack-work"
+
+matrix:
+  include:
+
+  - ghc: 8.2.2
+    env: GHCVER='8.2.2' STACK_YAML="$HOME/build/kowainik/life-sync/stack.yaml"
+
+  - ghc: 8.4.3
+    env: GHCVER='8.4.3' STACK_YAML="$HOME/build/kowainik/life-sync/stack-$GHCVER.yaml"
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:hvr/ghc'
+    packages:
+      - libgmp-dev
+
+before_install:
+  - mkdir -p ~/.local/bin
+  - export PATH="$HOME/.local/bin:$PATH"
+  - travis_retry curl -L 'https://www.stackage.org/stack/linux-x86_64' | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+  - stack --version
+
+
+install:
+  - travis_wait 30 stack setup --no-terminal
+  - stack ghc -- --version
+
+  - travis_wait 40 stack build --only-dependencies --no-terminal
+  - travis_wait 40 stack build --test --bench --haddock --no-run-tests --no-run-benchmarks --no-haddock-deps --no-terminal
+
+script:
+  - travis_wait 40 stack build --test --no-terminal
+
+notifications:
+  email: false
+  slack:
+    rooms:
+      - kowainik:BgAK9TdPI0Z6LmG5aE69ap3f
+    on_success: change
+    on_failure: always

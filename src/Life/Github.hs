@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+
 -- | Utilities to work with GitHub repositories using "hub".
 
 module Life.Github
@@ -13,8 +14,6 @@ module Life.Github
        , createRepository
        , updateDotfilesRepo
        ) where
-
-import Universum
 
 import Path (Abs, Dir, File, Path, Rel, mkRelDir, (</>))
 import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)

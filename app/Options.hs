@@ -10,11 +10,8 @@ module Options
        , parseCommand
        ) where
 
-import Universum
-
-import Options.Applicative (Parser, ParserInfo, auto, command, execParser, flag', fullDesc, help,
-                            helper, info, long, metavar, option, progDesc, short, showDefault,
-                            strArgument, strOption, subparser, switch, value)
+import Options.Applicative (Parser, ParserInfo, command, execParser, fullDesc, help, helper, info,
+                            metavar, progDesc, strArgument, subparser)
 
 import Life.Github (Owner (..))
 

@@ -4,9 +4,7 @@ module Life.Main.Update
        ( lifeAdd
        ) where
 
-import Universum
-
-import Path (Abs, Path, Rel, dirname, filename, toFilePath)
+import Path (Path, Rel, dirname, filename, toFilePath)
 import Path.IO (doesDirExist, doesFileExist, getHomeDir, makeRelative, resolveDir, resolveFile)
 
 import Life.Configuration (LifeConfiguration, parseGlobalLife, singleDirConfig, singleFileConfig,

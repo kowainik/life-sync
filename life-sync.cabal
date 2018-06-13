@@ -1,44 +1,51 @@
 name:                life-sync
 version:             1.0
 description:         Synchronize personal configs across multiple machines
-homepage:            https://github.com/ChShersh/life-sync
-bug-reports:         https://github.com/ChShersh/life-sync/issues
+homepage:            https://github.com/kowainik/life-sync
+bug-reports:         https://github.com/kowainik/life-sync/issues
 license:             MIT
 license-file:        LICENSE
-author:              Dmitry Kovanikov
-maintainer:          kovanikov@gmail.com
-copyright:           2017 Dmitry Kovanikov
+author:              Kowainik
+maintainer:          xrom.xkov@gmail.com
+copyright:           2018 Kowainik
 category:            Configuration
 stability:           experimental
 build-type:          Simple
-extra-source-files:  README.md
-cabal-version:       >=1.10
-tested-with:         GHC == 8.2.1
+cabal-version:       2.0
+tested-with:         GHC == 8.2.2
+                   , GHC == 8.4.3
+extra-doc-files:     README.md
+                   , CHANGELOG.md
+
+source-repository head
+  type:                git
+  location:            https://github.com/kowainik/life-sync.git
 
 library
   hs-source-dirs:      src
 
-  exposed-modules:     Life.Configuration
+  exposed-modules:     Prelude
+                       Life.Configuration
                        Life.Github
                        Life.Shell
                        Life.Main.Init
                        Life.Main.Update
 
-  build-depends:       base
+  build-depends:       base-noprelude >= 4.9 && < 5
                      , containers
                      , fmt
                      , microlens-platform
                      , path
                      , path-io
                      , process
-                     , toml-parser
-                     , universum >= 1.0.0
+                     , toml-parser == 0.1.0.0
+                     , universum >= 1.2.0
 
   ghc-options:         -Wall
   default-language:    Haskell2010
 
-  default-extensions:  LambdaCase
-                       NoImplicitPrelude
+  default-extensions:  GeneralizedNewtypeDeriving
+                       LambdaCase
                        OverloadedStrings
                        RecordWildCards
 
@@ -48,14 +55,13 @@ executable life
   other-modules:       Options
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
 
-  build-depends:       base , life-sync
+  build-depends:       base-noprelude
+                     , life-sync
                      , optparse-applicative
-                     , universum
 
   default-language:    Haskell2010
 
   default-extensions:  LambdaCase
-                       NoImplicitPrelude
                        OverloadedStrings
                        RecordWildCards
 
@@ -63,11 +69,7 @@ test-suite life-sync-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  build-depends:       base
+  build-depends:       base-noprelude
                      , life-sync
-  ghc-options:         -Wall -Werror -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
-
-source-repository head
-  type:                git
-  location:            https://github.com/ChShersh/life-sync.git
