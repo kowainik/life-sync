@@ -4,24 +4,39 @@ module Life.Main.Init
        ( lifeInit
        ) where
 
-import Path.IO (copyFile)
+import Path.IO (copyFile, doesDirExist, doesFileExist)
 
 import Life.Configuration (lifePath, singleFileConfig, writeGlobalLife)
 import Life.Github (Owner, Repo (Repo), createRepository, insideRepo, repoName)
+import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (createDirInHome, relativeToHome)
 
 lifeInit :: Owner -> IO ()
 lifeInit owner = do
     -- create initial life configuration
-    -- TODO: check for .life existence
     lifeFilePath  <- relativeToHome lifePath
-    let lifeConfig = singleFileConfig lifePath
-    writeGlobalLife lifeConfig
+    -- check for .life existence
+    isFile <- doesFileExist lifeFilePath
+    if isFile
+        then do
+            warningMessage ".life file is already exist."
+            useIt <- chooseYesNo "Would you like to use it?"
+            unless useIt writeConf
+        else writeConf
+
+    -- check for dotfiles existence
+    whenM (relativeToHome repoName >>= doesDirExist) $
+        errorMessage "dotfiles folder already exist" >> exitFailure
 
     -- create dotfiles repository
-    -- TODO: check for dotfiles existence
     () <$ createDirInHome repoName
     insideRepo $ do
         -- TODO: use list of some predefined files and directories
         copyFile lifeFilePath lifePath
         createRepository owner (Repo "dotfiles")
+  where
+    writeConf :: IO ()
+    writeConf = do
+        infoMessage "Writing .life configuration file"
+        let lifeConfig = singleFileConfig lifePath
+        writeGlobalLife lifeConfig

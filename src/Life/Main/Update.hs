@@ -7,15 +7,31 @@ module Life.Main.Update
 import Path (Path, Rel, dirname, filename, toFilePath)
 import Path.IO (doesDirExist, doesFileExist, getHomeDir, makeRelative, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, parseGlobalLife, singleDirConfig, singleFileConfig,
-                           writeGlobalLife)
-import Life.Github (updateDotfilesRepo)
+import Life.Configuration (LifeConfiguration, lifePath, parseGlobalLife, singleDirConfig,
+                           singleFileConfig, writeGlobalLife)
+import Life.Github (Owner (..), updateDotfilesRepo)
+import Life.Main.Init (lifeInit)
+import Life.Message (chooseYesNo, errorMessage, infoMessage, promptNonEmpty, skipMessage,
+                     warningMessage)
+import Life.Shell (relativeToHome)
 
 -- | Add path to existing life-configuration file.
 lifeAdd :: FilePath -> IO ()
 lifeAdd path = do
-    -- TODO: check for .life existence
     -- TODO: check for dotfiles existence
+
+    -- check for .life existence
+    lifeFilePath  <- relativeToHome lifePath
+    unlessM (doesFileExist lifeFilePath) $ do
+        warningMessage ".life file doesn't exist"
+        toInit <- chooseYesNo "Would you like to proceed initialization process?"
+        if toInit
+            then do
+                infoMessage "Initialization process starts.."
+                skipMessage "Insert your GitHub username:"
+                owner <- promptNonEmpty
+                lifeInit $ Owner owner
+            else errorMessage "Aborting life-add command." >> exitFailure
 
     homeDirPath <- getHomeDir
     filePath    <- resolveFile homeDirPath path
