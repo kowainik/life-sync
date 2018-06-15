@@ -24,10 +24,11 @@ module Life.Configuration
 
          -- * Parse and render 'LifeConfiguration' under `~/.life`
        , parseGlobalLife
+       , parseLifeConfiguration
+       , renderLifeConfiguration
        , writeGlobalLife
        ) where
 
-import Control.Exception.Base (throwIO)
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
 import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, toFilePath)
@@ -46,7 +47,7 @@ import qualified Toml
 data LifeConfiguration = LifeConfiguration
      { lifeConfigurationFiles       :: Set (Path Rel File)
      , lifeConfigurationDirectories :: Set (Path Rel Dir)
-     } deriving (Show)
+     } deriving (Show, Eq)
 
 -- | Name for life configuration file.
 lifePath :: Path Rel File
@@ -91,7 +92,7 @@ corpseConfiguationT = CorpseConfiguration
     stringV :: Valuer 'Toml.TString String
     stringV = Valuer (Toml.matchText >=> pure . toString) (Toml.String . toText)
 
-resurrect :: CorpseConfiguration -> IO LifeConfiguration
+resurrect :: MonadThrow m => CorpseConfiguration -> m LifeConfiguration
 resurrect CorpseConfiguration{..} = do
     filePaths <- mapM parseRelFile corpseFiles
     dirPaths  <- mapM parseRelDir  corpseDirectories
@@ -131,14 +132,14 @@ writeGlobalLife config = do
 -- Life configuration parsing
 ----------------------------------------------------------------------------
 
+parseLifeConfiguration :: MonadThrow m => Text -> m LifeConfiguration
+parseLifeConfiguration tomlText = case Toml.decode corpseConfiguationT tomlText of
+    Left err  -> throwM $ LoadTomlException (toFilePath lifePath) $ Toml.prettyException err
+    Right cfg -> resurrect cfg
+
 -- | Reads 'LifeConfiguration' from @~\/.life@ file.
 parseGlobalLife :: IO LifeConfiguration
-parseGlobalLife = do
-    lifeFilePath <- relativeToHome lifePath
-    tomlText     <- readFile $ fromAbsFile lifeFilePath
-    case Toml.decode corpseConfiguationT tomlText of
-        Left err -> throwIO $ LoadTomlException (toFilePath lifeFilePath) $ Toml.prettyException err
-        Right cfg -> resurrect cfg
+parseGlobalLife = relativeToHome lifePath >>= readFile . fromAbsFile >>= parseLifeConfiguration
 
 data LoadTomlException = LoadTomlException FilePath Text
 
