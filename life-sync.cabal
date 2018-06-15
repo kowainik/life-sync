@@ -69,7 +69,21 @@ test-suite life-sync-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  build-depends:       base-noprelude
-                     , life-sync
+  other-modules:       Test.Roundtrip
+
+  build-tool-depends:  tasty-discover:tasty-discover
+  build-depends:       base-noprelude, life-sync
+                     , containers
+                     , filepath
+                     , hedgehog
+                     , path
+                     , tasty
+                     , tasty-hedgehog
+
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
+
+  default-extensions:  LambdaCase
+                       OverloadedStrings
+                       RecordWildCards
+                       TypeApplications
