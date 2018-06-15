@@ -17,11 +17,14 @@ hprop_ConfigurationRoundtrip = property $ do
 
 genLifeConfiguration :: Gen LifeConfiguration
 genLifeConfiguration = do
-    -- it's safe to use 'Path' constructor here even if such things are not recommended by API
-    -- our generators should be safe; and if not - this will be caught by test later
-    lifeConfigurationFiles       <- Set.fromList . fmap Path <$> Gen.list (Range.constant 0 30) genFilePath
-    lifeConfigurationDirectories <- Set.fromList . fmap Path <$> Gen.list (Range.constant 0 30) genDirPath
+    lifeConfigurationFiles       <- genPathSet genFilePath
+    lifeConfigurationDirectories <- genPathSet genDirPath
     pure LifeConfiguration{..}
+
+-- it's safe to use 'Path' constructor here even if such things are not recommended by API
+-- our generators should be safe; and if not - this will be caught by test later
+genPathSet :: Gen FilePath -> Gen (Set (Path b t))
+genPathSet gen = Set.fromList . fmap Path <$> Gen.list (Range.constant 0 30) gen
 
 genDirPath :: Gen FilePath
 genDirPath = (++ [pathSeparator]) <$> genFilePath
