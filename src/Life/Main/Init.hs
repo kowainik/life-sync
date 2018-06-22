@@ -4,10 +4,10 @@ module Life.Main.Init
        ( lifeInit
        ) where
 
-import Path.IO (copyFile, doesDirExist, doesFileExist)
+import Path.IO (copyFile, doesFileExist)
 
 import Life.Configuration (lifePath, singleFileConfig, writeGlobalLife)
-import Life.Github (Owner, Repo (Repo), createRepository, insideRepo, repoName)
+import Life.Github (Owner, Repo (Repo), createRepository, doesRepoExist, insideRepo, repoName)
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (createDirInHome, relativeToHome)
 
@@ -25,7 +25,7 @@ lifeInit owner = do
         else writeConf
 
     -- check for dotfiles existence
-    whenM (relativeToHome repoName >>= doesDirExist) $
+    whenM doesRepoExist $
         errorMessage "dotfiles folder already exist" >> exitFailure
 
     -- create dotfiles repository
