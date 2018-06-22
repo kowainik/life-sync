@@ -30,6 +30,7 @@ library
                        Life.Message
                        Life.Shell
                        Life.Main.Init
+                       Life.Main.Remove
                        Life.Main.Update
 
   build-depends:       base-noprelude >= 4.9 && < 5

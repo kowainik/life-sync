@@ -14,12 +14,14 @@ module Life.Github
          -- * Repository manipulation commands
        , createRepository
        , updateDotfilesRepo
+       , removeFromRepo
        ) where
 
-import Path (Abs, Dir, File, Path, Rel, mkRelDir, (</>))
+import Path (Abs, Dir, File, Path, Rel, mkRelDir, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, getHomeDir, withCurrentDir)
 
 import Life.Configuration (LifeConfiguration (..))
+import Life.Message (infoMessage)
 import Life.Shell (relativeToHome)
 
 newtype Owner = Owner { getOwner :: Text } deriving (Show)
@@ -97,3 +99,13 @@ copyPathList copyAction pathList = do
         let copySource      = homeDir </> entryPath
         let copyDestination = repoDir </> entryPath
         copyAction copySource copyDestination
+
+-- | Removes file or directory form the repository and commits
+removeFromRepo :: (Path Rel t -> IO ()) -> Path Rel t -> IO ()
+removeFromRepo removeFun path = do
+    removeFun path
+
+    let pathTextName = toText $ toFilePath path
+    let commitMsg    = "Remove: " <> pathTextName
+    infoMessage commitMsg
+    pushRepo commitMsg
