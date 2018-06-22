@@ -27,17 +27,20 @@ library
   exposed-modules:     Prelude
                        Life.Configuration
                        Life.Github
+                       Life.Message
                        Life.Shell
                        Life.Main.Init
                        Life.Main.Update
 
   build-depends:       base-noprelude >= 4.9 && < 5
+                     , ansi-terminal
                      , containers
                      , fmt
                      , microlens-platform
                      , path
                      , path-io
                      , process
+                     , text >= 1.2
                      , tomland >= 0.2.1
                      , universum >= 1.2.0
 

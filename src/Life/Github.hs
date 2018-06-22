@@ -9,6 +9,7 @@ module Life.Github
          -- * Repository utils
        , repoName
        , insideRepo
+       , doesRepoExist
 
          -- * Repository manipulation commands
        , createRepository
@@ -16,7 +17,7 @@ module Life.Github
        ) where
 
 import Path (Abs, Dir, File, Path, Rel, mkRelDir, (</>))
-import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
+import Path.IO (copyDirRecur, copyFile, doesDirExist, getHomeDir, withCurrentDir)
 
 import Life.Configuration (LifeConfiguration (..))
 import Life.Shell (relativeToHome)
@@ -60,6 +61,10 @@ insideRepo action = do
 -- | Commits all changes inside 'repoName' and pushes to remote.
 pushRepo :: Text -> IO ()
 pushRepo = insideRepo . pushka
+
+-- | Checks if @dotfiles/@ folder exist in home directory.
+doesRepoExist :: IO Bool
+doesRepoExist = doesDirExist =<< relativeToHome repoName
 
 ----------------------------------------------------------------------------
 -- File manipulation
