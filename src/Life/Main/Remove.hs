@@ -1,5 +1,4 @@
-{-# LANGUAGE Rank2Types       #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE Rank2Types #-}
 
 -- | Functions to remove from your life.
 
@@ -57,6 +56,8 @@ resolveConfiguration confLens removeFun path = do
     configuration <- parseGlobalLife
 
     let newConfiguration = configuration & confLens %~ Set.delete path
-    writeGlobalLife newConfiguration
-
-    removeFromRepo removeFun path
+    if configuration == newConfiguration
+    then warningMessage "File or directory is not in tracked" >> exitFailure
+    else do
+        writeGlobalLife newConfiguration
+        removeFromRepo removeFun path

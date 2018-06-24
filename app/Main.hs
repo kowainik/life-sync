@@ -1,8 +1,8 @@
 module Main where
 
+import Life.Main.Add (lifeAdd)
 import Life.Main.Init (lifeInit)
 import Life.Main.Remove (lifeRemove)
-import Life.Main.Update (lifeAdd)
 
 import Options (FileOptions (..), InitOptions (..), LifeCommand (..), parseCommand)
 

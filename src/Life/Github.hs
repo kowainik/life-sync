@@ -1,3 +1,4 @@
+{-# LANGUAGE GADTs           #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Utilities to work with GitHub repositories using "hub".
@@ -17,11 +18,13 @@ module Life.Github
        , removeFromRepo
        ) where
 
+import Control.Exception (throwIO)
 import Path (Abs, Dir, File, Path, Rel, mkRelDir, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, getHomeDir, withCurrentDir)
+import System.IO.Error (IOError, isDoesNotExistError)
 
-import Life.Configuration (LifeConfiguration (..))
-import Life.Message (infoMessage)
+import Life.Configuration (LifeConfiguration (..), lifePath)
+import Life.Message (errorMessage, infoMessage)
 import Life.Shell (relativeToHome)
 
 newtype Owner = Owner { getOwner :: Text } deriving (Show)
@@ -103,9 +106,22 @@ copyPathList copyAction pathList = do
 -- | Removes file or directory form the repository and commits
 removeFromRepo :: (Path Rel t -> IO ()) -> Path Rel t -> IO ()
 removeFromRepo removeFun path = do
-    removeFun path
+    catch (removeFun path) handleNotExist
 
-    let pathTextName = toText $ toFilePath path
+    -- update .life file
+    lifeFile <- relativeToHome lifePath
+    homeDir <- getHomeDir
+    let repoLifeFile = homeDir </> repoName </> lifePath
+    copyFile lifeFile repoLifeFile
+
     let commitMsg    = "Remove: " <> pathTextName
     infoMessage commitMsg
     pushRepo commitMsg
+  where
+    pathTextName :: Text
+    pathTextName = toText $ toFilePath path
+
+    handleNotExist :: (e ~ IOError) => e -> IO ()
+    handleNotExist e = if isDoesNotExistError e
+        then errorMessage ("File/directory " <> pathTextName <> " is not found") >> exitFailure
+        else throwIO e
