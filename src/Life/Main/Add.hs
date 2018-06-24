@@ -1,6 +1,6 @@
--- | Functions to update your life.
+-- | Functions to add file/directory to your life.
 
-module Life.Main.Update
+module Life.Main.Add
        ( lifeAdd
        ) where
 

@@ -29,8 +29,9 @@ library
                        Life.Github
                        Life.Message
                        Life.Shell
+                       Life.Main.Add
                        Life.Main.Init
-                       Life.Main.Update
+                       Life.Main.Remove
 
   build-depends:       base-noprelude >= 4.9 && < 5
                      , ansi-terminal
@@ -51,6 +52,7 @@ library
                        LambdaCase
                        OverloadedStrings
                        RecordWildCards
+                       TypeApplications
 
 executable life
   hs-source-dirs:      app

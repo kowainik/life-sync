@@ -5,7 +5,7 @@
 module Options
        ( LifeCommand (..)
        , InitOptions (..)
-       , AddOptions  (..)
+       , FileOptions  (..)
 
        , parseCommand
        ) where
@@ -18,7 +18,8 @@ import Life.Github (Owner (..))
 -- | Commands to execute
 data LifeCommand
     = Init InitOptions
-    | Add  AddOptions
+    | Add  FileOptions
+    | Remove FileOptions
     deriving (Show)
 
 ---------------------------------------------------------------------------
@@ -31,8 +32,11 @@ commandParser = subparser $
             (info (helper <*> fmap Init initOptionsParser)
                   (fullDesc <> progDesc "Initialize GitHub repository named 'dotfiles' if you don't have one."))
  <> command "add"
-            (info (helper <*> fmap Add  addOptionsParser)
-                  (fullDesc <> progDesc "Add file or directory to life configuration."))
+            (info (helper <*> fmap Add  fileOptionsParser)
+                  (fullDesc <> progDesc "Add file or directory to the life configuration."))
+ <> command "remove"
+            (info (helper <*> fmap Remove  fileOptionsParser)
+                  (fullDesc <> progDesc "Remove file or directory from the life configuration."))
 
 optionsInfo :: ParserInfo LifeCommand
 optionsInfo = info
@@ -62,13 +66,13 @@ initOptionsParser = do
 -- life add
 ----------------------------------------------------------------------------
 
-data AddOptions = AddOptions
-     { addOptionsFile :: FilePath
+data FileOptions = FileOptions
+     { fileOptionsFile :: FilePath
      } deriving (Show)
 
-addOptionsParser :: Parser AddOptions
-addOptionsParser = do
-    addOptionsFile <- strArgument
+fileOptionsParser :: Parser FileOptions
+fileOptionsParser = do
+    fileOptionsFile <- strArgument
       $ metavar "FILE_PATH"
-     <> help "Path to file or directory"
-    pure AddOptions{..}
+     <> help "Relative path to file or directory"
+    pure FileOptions{..}
