@@ -1,18 +1,45 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE TypeFamilies      #-}
 
 -- | This module contains utility functions to work with shell.
 
+-- TODO: rename this module to Life.Path ?
+
 module Life.Shell
-       ( createDirInHome
+       ( -- * Constants
+         lifePath
+       , repoName
+
+         -- * Functions
+       , LifeExistence (..)
+       , createDirInHome
        , relativeToHome
+       , whatIsLife
        ) where
 
-import Path (Abs, Dir, Path, Rel, (</>))
-import Path.IO (createDirIfMissing, getHomeDir)
+import Path (Abs, Dir, File, Path, Rel, mkRelDir, mkRelFile, (</>))
+import Path.IO (createDirIfMissing, doesDirExist, doesFileExist, getHomeDir)
 import System.Process (callCommand, showCommandForUser)
+
+----------------------------------------------------------------------------
+-- Global constants
+----------------------------------------------------------------------------
+
+-- | Name for life configuration file.
+lifePath :: Path Rel File
+lifePath = $(mkRelFile ".life")
+
+-- TODO: consistent naming with @lifePath@ ?
+-- | Default repository name for life configuration files.
+repoName :: Path Rel Dir
+repoName = $(mkRelDir "dotfiles/")
+
+----------------------------------------------------------------------------
+-- Shell interface
+----------------------------------------------------------------------------
 
 -- This is needed to be able to call commands by writing strings.
 instance (a ~ Text, b ~ ()) => IsString ([a] -> IO b) where
@@ -29,3 +56,23 @@ relativeToHome :: MonadIO m => Path Rel t -> m (Path Abs t)
 relativeToHome path = do
     homeDir <- getHomeDir
     pure $ homeDir </> path
+
+data LifeExistence
+    = NoLife
+    | OnlyLife (Path Abs File)
+    | OnlyRepo (Path Abs Dir)
+    | Both (Path Abs File) (Path Abs Dir)
+
+whatIsLife :: IO LifeExistence
+whatIsLife = do
+    lifeFile <- relativeToHome lifePath
+    repoDir  <- relativeToHome repoName
+
+    isFile <- doesFileExist lifeFile
+    isDir  <- doesDirExist  repoDir
+
+    pure $ case (isFile, isDir) of
+        (False, False) -> NoLife
+        (True, False)  -> OnlyLife lifeFile
+        (False, True)  -> OnlyRepo repoDir
+        (True, True)   -> Both lifeFile repoDir

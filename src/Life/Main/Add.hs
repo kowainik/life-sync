@@ -7,44 +7,36 @@ module Life.Main.Add
 import Path (Path, Rel, dirname, filename, toFilePath)
 import Path.IO (doesDirExist, doesFileExist, getHomeDir, makeRelative, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, lifePath, parseGlobalLife, singleDirConfig,
-                           singleFileConfig, writeGlobalLife)
-import Life.Github (Owner (..), doesRepoExist, updateDotfilesRepo)
+import Life.Configuration (LifeConfiguration, parseGlobalLife, singleDirConfig, singleFileConfig,
+                           writeGlobalLife)
+import Life.Github (Owner (..), updateDotfilesRepo)
 import Life.Main.Init (lifeInit)
-import Life.Message (chooseYesNo, errorMessage, infoMessage, promptNonEmpty, skipMessage,
+import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
                      warningMessage)
-import Life.Shell (relativeToHome)
+import Life.Shell (LifeExistence (..), whatIsLife)
 
 -- | Add path to existing life-configuration file.
 lifeAdd :: FilePath -> IO ()
-lifeAdd path = do
-    -- check for .life existence
-    isLifeFile <- doesFileExist =<< relativeToHome lifePath
-    -- check for dotfiles existence
-    isDotDir   <- doesRepoExist
+lifeAdd path = whatIsLife >>= \case
+    -- actual life add process
+    Both _ _ -> addingProcess
 
-    case (isLifeFile, isDotDir) of
-        -- actual life add process
-        (True, True)  -> addingProcess
-        -- if one of them is missing -- abort
-        (True, False) -> warningMessage "dotfiles/ directory doesn't exist" >> abortLifeAdd
-        (False, True) -> warningMessage ".life file doesn't exist" >> abortLifeAdd
-        -- if both .life and dotfiles doesn't exist go to init process
-        (False, False) -> do
-            warningMessage ".life file and dotfiles/ do not exist"
-            toInit <- chooseYesNo "Would you like to proceed initialization process?"
-            if toInit
-                then do
-                    infoMessage "Initialization process starts.."
-                    skipMessage "Insert your GitHub username:"
-                    owner <- promptNonEmpty
-                    lifeInit $ Owner owner
-                else abortLifeAdd
+    -- if one of them is missing -- abort
+    OnlyRepo _ -> abortCmd "add" ".life file doesn't exist"
+    OnlyLife _ -> abortCmd "add" "dotfiles/ directory doesn't exist"
+
+    -- if both .life and dotfiles doesn't exist go to init process
+    NoLife -> do
+        warningMessage ".life file and dotfiles/ do not exist"
+        toInit <- chooseYesNo "Would you like to proceed initialization process?"
+        if toInit then do
+            infoMessage "Initialization process starts.."
+            skipMessage "Insert your GitHub username:"
+            owner <- promptNonEmpty
+            lifeInit $ Owner owner
             addingProcess
+        else abortCmd "add" "Can't execute 'life add' if '~/.life' file is not initialized"
   where
-    abortLifeAdd :: IO ()
-    abortLifeAdd = errorMessage "Aborting life-add command." >> exitFailure
-
     addingProcess :: IO ()
     addingProcess = do
         homeDirPath <- getHomeDir

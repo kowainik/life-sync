@@ -7,9 +7,7 @@ module Life.Github
        , Repo  (..)
 
          -- * Repository utils
-       , repoName
        , insideRepo
-       , doesRepoExist
 
          -- * Repository manipulation commands
        , createRepository
@@ -18,13 +16,13 @@ module Life.Github
        ) where
 
 import Control.Exception (throwIO)
-import Path (Abs, Dir, File, Path, Rel, mkRelDir, toFilePath, (</>))
-import Path.IO (copyDirRecur, copyFile, doesDirExist, getHomeDir, withCurrentDir)
+import Path (Abs, Dir, File, Path, Rel, toFilePath, (</>))
+import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 import System.IO.Error (IOError, isDoesNotExistError)
 
-import Life.Configuration (LifeConfiguration (..), lifePath)
+import Life.Configuration (LifeConfiguration (..))
 import Life.Message (errorMessage, infoMessage)
-import Life.Shell (relativeToHome)
+import Life.Shell (lifePath, relativeToHome, repoName)
 
 newtype Owner = Owner { getOwner :: Text } deriving (Show)
 newtype Repo  = Repo  { getRepo  :: Text } deriving (Show)
@@ -52,10 +50,6 @@ createRepository (Owner owner) (Repo repo) = do
 -- dotfiles workflow
 ----------------------------------------------------------------------------
 
--- | Default repository name for life configuration files.
-repoName :: Path Rel Dir
-repoName = $(mkRelDir "dotfiles/")
-
 -- | Executes action with 'repoName' set as pwd.
 insideRepo :: (MonadIO m, MonadMask m) => m a -> m a
 insideRepo action = do
@@ -65,10 +59,6 @@ insideRepo action = do
 -- | Commits all changes inside 'repoName' and pushes to remote.
 pushRepo :: Text -> IO ()
 pushRepo = insideRepo . pushka
-
--- | Checks if @dotfiles/@ folder exist in home directory.
-doesRepoExist :: IO Bool
-doesRepoExist = doesDirExist =<< relativeToHome repoName
 
 ----------------------------------------------------------------------------
 -- File manipulation

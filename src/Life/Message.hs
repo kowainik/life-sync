@@ -10,6 +10,7 @@ module Life.Message
        , successMessage
        , infoMessage
        , skipMessage
+       , abortCmd
 
          -- * Questions
        , chooseYesNo
@@ -84,6 +85,13 @@ warningMessage = colorMessage Yellow
 successMessage = colorMessage Green
 infoMessage    = colorMessage Blue
 skipMessage    = colorMessage Cyan
+
+-- | Print message and abort current process.
+abortCmd :: Text -> Text -> IO ()
+abortCmd cmd msg = do
+    warningMessage msg
+    errorMessage $ "Aborting 'life " <> cmd <> "' command."
+    exitFailure
 
 ----------------------------------------------------------------------------
 -- Questions
