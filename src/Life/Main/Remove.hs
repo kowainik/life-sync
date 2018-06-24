@@ -6,10 +6,11 @@ module Life.Main.Remove
        ( lifeRemove
        ) where
 
-import Path (Path, Rel, parseRelDir, parseRelFile)
-import Path.IO (removeDirRecur, removeFile)
+import Path (Path, Rel)
+import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, directories, files, parseGlobalLife, writeGlobalLife)
+import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseGlobalLife,
+                           writeGlobalLife)
 import Life.Github (removeFromRepo)
 import Life.Message (abortCmd, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
@@ -17,22 +18,22 @@ import Life.Shell (LifeExistence (..), whatIsLife)
 import qualified Data.Set as Set
 
 -- | Remove path from existing life-configuration file.
-lifeRemove :: FilePath -> IO ()
-lifeRemove path = whatIsLife >>= \case
+lifeRemove :: LifePath -> IO ()
+lifeRemove lPath = whatIsLife >>= \case
     -- if one of them is missing -- abort
     NoLife -> abortCmd "remove" ".life and docfiles/ do not exist"
     OnlyLife _ -> abortCmd "remove" "dotfiles/ directory doesn't exist"
     OnlyRepo _ -> abortCmd "remove" ".life file doesn't exist"
     -- actual life remove process
     Both _ _ -> do
-        let filePath = parseRelFile @Maybe path
-        let dirPath  = parseRelDir  @Maybe path
-
-        case (filePath, dirPath) of
-            (Nothing, Nothing) -> abortCmd "remove" $ toText path  <> " is neither file nor directory"
-            (Just relFile, Nothing) -> resolveConfiguration files removeFile relFile
-            (Nothing, Just relDir) -> resolveConfiguration directories removeDirRecur relDir
-            _ -> error "File and dir at the same time"
+        homeDirPath  <- getHomeDir
+        case lPath of
+            (File path) -> do
+                filePath <- resolveFile homeDirPath path >>= makeRelative homeDirPath
+                resolveConfiguration files removeFile filePath
+            (Dir path)  -> do
+                dirPath <- resolveDir homeDirPath path >>= makeRelative homeDirPath
+                resolveConfiguration directories removeDirRecur dirPath
 
 resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
                      -> (Path Rel t -> IO ()) -- ^ function to remove object

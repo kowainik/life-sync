@@ -5,21 +5,22 @@
 module Options
        ( LifeCommand (..)
        , InitOptions (..)
-       , FileOptions  (..)
+       , PathOptions  (..)
 
        , parseCommand
        ) where
 
 import Options.Applicative (Parser, ParserInfo, command, execParser, fullDesc, help, helper, info,
-                            metavar, progDesc, strArgument, subparser)
+                            long, metavar, progDesc, short, strArgument, strOption, subparser)
 
+import Life.Configuration (LifePath (..))
 import Life.Github (Owner (..))
 
 -- | Commands to execute
 data LifeCommand
-    = Init InitOptions
-    | Add  FileOptions
-    | Remove FileOptions
+    = Init   InitOptions
+    | Add    PathOptions
+    | Remove PathOptions
     deriving (Show)
 
 ---------------------------------------------------------------------------
@@ -32,10 +33,10 @@ commandParser = subparser $
             (info (helper <*> fmap Init initOptionsParser)
                   (fullDesc <> progDesc "Initialize GitHub repository named 'dotfiles' if you don't have one."))
  <> command "add"
-            (info (helper <*> fmap Add  fileOptionsParser)
+            (info (helper <*> fmap Add pathOptionsParser)
                   (fullDesc <> progDesc "Add file or directory to the life configuration."))
  <> command "remove"
-            (info (helper <*> fmap Remove  fileOptionsParser)
+            (info (helper <*> fmap Remove pathOptionsParser)
                   (fullDesc <> progDesc "Remove file or directory from the life configuration."))
 
 optionsInfo :: ParserInfo LifeCommand
@@ -66,13 +67,25 @@ initOptionsParser = do
 -- life add
 ----------------------------------------------------------------------------
 
-data FileOptions = FileOptions
-     { fileOptionsFile :: FilePath
+data PathOptions = PathOptions
+     { pathOptionsPath :: LifePath
      } deriving (Show)
 
-fileOptionsParser :: Parser FileOptions
-fileOptionsParser = do
-    fileOptionsFile <- strArgument
-      $ metavar "FILE_PATH"
-     <> help "Relative path to file or directory"
-    pure FileOptions{..}
+pathOptionsParser :: Parser PathOptions
+pathOptionsParser = do
+    pathOptionsPath <- fileParser <|> dirParser
+    pure PathOptions{..}
+  where
+    fileParser :: Parser LifePath
+    fileParser = File <$> strOption
+                        ( metavar "FILE_PATH"
+                       <> long "file"
+                       <> short 'f'
+                        )
+
+    dirParser :: Parser LifePath
+    dirParser = Dir <$> strOption
+                        ( metavar "DIRECTORY_PATH"
+                       <> long "dir"
+                       <> short 'd'
+                        )

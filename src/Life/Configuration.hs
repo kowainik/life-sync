@@ -8,7 +8,9 @@
 -- | Contains configuration data type.
 
 module Life.Configuration
-       ( LifeConfiguration  (..)
+       ( LifePath (..)
+
+       , LifeConfiguration  (..)
        , singleDirConfig
        , singleFileConfig
 
@@ -39,6 +41,11 @@ import Life.Shell (lifePath, relativeToHome)
 import qualified Data.Set as Set
 import qualified Text.Show as Show
 import qualified Toml
+
+
+-- | Data type to represent either file or directory.
+data LifePath = File FilePath | Dir FilePath
+    deriving (Show)
 
 ----------------------------------------------------------------------------
 -- Life Configuration data type with lenses

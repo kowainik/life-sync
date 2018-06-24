@@ -7,17 +7,17 @@ module Life.Main.Add
 import Path (Path, Rel, dirname, filename, toFilePath)
 import Path.IO (doesDirExist, doesFileExist, getHomeDir, makeRelative, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, parseGlobalLife, singleDirConfig, singleFileConfig,
-                           writeGlobalLife)
+import Life.Configuration (LifeConfiguration, LifePath (..), parseGlobalLife, singleDirConfig,
+                           singleFileConfig, writeGlobalLife)
 import Life.Github (Owner (..), updateDotfilesRepo)
 import Life.Main.Init (lifeInit)
-import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
+import Life.Message (abortCmd, chooseYesNo, errorMessage, infoMessage, promptNonEmpty, skipMessage,
                      warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
 
 -- | Add path to existing life-configuration file.
-lifeAdd :: FilePath -> IO ()
-lifeAdd path = whatIsLife >>= \case
+lifeAdd :: LifePath -> IO ()
+lifeAdd lPath = whatIsLife >>= \case
     -- actual life add process
     Both _ _ -> addingProcess
 
@@ -40,21 +40,21 @@ lifeAdd path = whatIsLife >>= \case
     addingProcess :: IO ()
     addingProcess = do
         homeDirPath <- getHomeDir
-        filePath    <- resolveFile homeDirPath path
-        dirPath     <- resolveDir  homeDirPath path
+        case lPath of
+            (File path) -> do
+                filePath <- resolveFile homeDirPath path
+                whenM (doesFileExist filePath) $ do
+                    relativeFile <- makeRelative homeDirPath filePath
+                    resolveConfiguration singleFileConfig filename relativeFile
 
-        -- check whether `path` is file or dir
-        isFile <- doesFileExist filePath
-        isDir  <- doesDirExist  dirPath
+            (Dir path)  -> do
+                dirPath <- resolveDir homeDirPath path
+                whenM (doesDirExist dirPath) $ do
+                    relativeDir <- makeRelative homeDirPath dirPath
+                    resolveConfiguration singleDirConfig dirname relativeDir
 
-        if isFile then do
-            relativeFile <- makeRelative homeDirPath filePath
-            resolveConfiguration singleFileConfig filename relativeFile
-        else if isDir then do
-            relativeDir <- makeRelative homeDirPath dirPath
-            resolveConfiguration singleDirConfig dirname relativeDir
-        else
-            putTextLn $ toText path <> " is neither file nor directory or just doesn't exist"
+            -- We didn't find the file
+        errorMessage "The file/directory doesn't exist" >> exitFailure
 
 
 resolveConfiguration :: (Path Rel t -> LifeConfiguration)
@@ -69,3 +69,4 @@ resolveConfiguration configBuilder pathName path = do
     let pathTextName = toText $ toFilePath $ pathName path
     let commitMsg    = "Add: " <> pathTextName
     updateDotfilesRepo commitMsg newConfiguration
+    exitSuccess
