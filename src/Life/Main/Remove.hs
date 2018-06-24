@@ -6,7 +6,7 @@ module Life.Main.Remove
        ( lifeRemove
        ) where
 
-import Path (Path, Rel)
+import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
 
 import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseGlobalLife,
@@ -36,7 +36,7 @@ lifeRemove lPath = whatIsLife >>= \case
                 resolveConfiguration directories removeDirRecur dirPath
 
 resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
-                     -> (Path Rel t -> IO ()) -- ^ function to remove object
+                     -> (Path Abs t -> IO ()) -- ^ function to remove object
                      -> Path Rel t
                      -> IO ()
 resolveConfiguration confLens removeFun path = do

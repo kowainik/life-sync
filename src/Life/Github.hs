@@ -93,9 +93,10 @@ copyPathList copyAction pathList = do
         copyAction copySource copyDestination
 
 -- | Removes file or directory form the repository and commits
-removeFromRepo :: (Path Rel t -> IO ()) -> Path Rel t -> IO ()
+removeFromRepo :: (Path Abs t -> IO ()) -> Path Rel t -> IO ()
 removeFromRepo removeFun path = do
-    catch (removeFun path) handleNotExist
+    absPath <- relativeToHome (repoName </> path)
+    catch (removeFun absPath) handleNotExist
 
     -- update .life file
     lifeFile <- relativeToHome lifePath
