@@ -35,7 +35,7 @@ lifeAdd path = whatIsLife >>= \case
             owner <- promptNonEmpty
             lifeInit $ Owner owner
             addingProcess
-        else abortCmd "add" "Can't execute 'life add' in .life file is not initialized"
+        else abortCmd "add" "Can't execute 'life add' if '~/.life' file is not initialized"
   where
     addingProcess :: IO ()
     addingProcess = do
