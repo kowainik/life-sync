@@ -1,4 +1,3 @@
-{-# LANGUAGE GADTs           #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Utilities to work with GitHub repositories using "hub".
@@ -110,8 +109,7 @@ removeFromRepo removeFun path = do
 
     -- update .life file
     lifeFile <- relativeToHome lifePath
-    homeDir <- getHomeDir
-    let repoLifeFile = homeDir </> repoName </> lifePath
+    repoLifeFile <- relativeToHome (repoName </> lifePath)
     copyFile lifeFile repoLifeFile
 
     let commitMsg    = "Remove: " <> pathTextName
@@ -121,7 +119,7 @@ removeFromRepo removeFun path = do
     pathTextName :: Text
     pathTextName = toText $ toFilePath path
 
-    handleNotExist :: (e ~ IOError) => e -> IO ()
+    handleNotExist :: IOError -> IO ()
     handleNotExist e = if isDoesNotExistError e
         then errorMessage ("File/directory " <> pathTextName <> " is not found") >> exitFailure
         else throwIO e
