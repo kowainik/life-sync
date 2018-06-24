@@ -52,6 +52,7 @@ library
                        LambdaCase
                        OverloadedStrings
                        RecordWildCards
+                       ScopedTypeVariables
                        TypeApplications
 
 executable life

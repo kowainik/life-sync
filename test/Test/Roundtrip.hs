@@ -13,7 +13,7 @@ import qualified Hedgehog.Range as Range
 hprop_ConfigurationRoundtrip :: Property
 hprop_ConfigurationRoundtrip = property $ do
     cfg <- forAll genLifeConfiguration
-    tripping cfg renderLifeConfiguration (parseLifeConfiguration @Maybe)
+    tripping cfg (renderLifeConfiguration True) (parseLifeConfiguration @Maybe)
 
 genLifeConfiguration :: Gen LifeConfiguration
 genLifeConfiguration = do
