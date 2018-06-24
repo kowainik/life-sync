@@ -15,9 +15,6 @@ module Life.Configuration
 --         -- * Parsing exceptions
 --       , ParseLifeException (..)
 
-         -- * Path to life
-       , lifePath
-
          -- * Lenses for 'LifeConfiguration'
        , files
        , directories
@@ -34,10 +31,10 @@ module Life.Configuration
 import Data.Maybe (maybeToList)
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
-import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, toFilePath)
+import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath)
 import Toml (BiToml, Valuer (..), (.=))
 
-import Life.Shell (relativeToHome)
+import Life.Shell (lifePath, relativeToHome)
 
 import qualified Data.Set as Set
 import qualified Text.Show as Show
@@ -51,10 +48,6 @@ data LifeConfiguration = LifeConfiguration
      { lifeConfigurationFiles       :: Set (Path Rel File)
      , lifeConfigurationDirectories :: Set (Path Rel Dir)
      } deriving (Show, Eq)
-
--- | Name for life configuration file.
-lifePath :: Path Rel File
-lifePath = $(mkRelFile ".life")
 
 makeFields ''LifeConfiguration
 
@@ -111,9 +104,9 @@ renderLifeConfiguration :: Bool  -- ^ True to see empty entries in output
                         -> LifeConfiguration
                         -> Text
 renderLifeConfiguration printIfEmpty LifeConfiguration{..} = mconcat $
-    maybeToList (render "directories" lifeConfigurationDirectories)
- ++ [ "\n" ]
- ++ maybeToList (render "files" lifeConfigurationFiles)
+       maybeToList (render "directories" lifeConfigurationDirectories)
+    ++ [ "\n" ]
+    ++ maybeToList (render "files" lifeConfigurationFiles)
   where
     render :: Text -> Set (Path b t) -> Maybe Text
     render key paths = do

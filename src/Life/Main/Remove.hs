@@ -7,46 +7,32 @@ module Life.Main.Remove
        ) where
 
 import Path (Path, Rel, parseRelDir, parseRelFile)
-import Path.IO (doesFileExist, removeDirRecur, removeFile)
+import Path.IO (removeDirRecur, removeFile)
 
-import Life.Configuration (LifeConfiguration, directories, files, lifePath, parseGlobalLife,
-                           writeGlobalLife)
-import Life.Github (doesRepoExist, removeFromRepo)
-import Life.Message (errorMessage, warningMessage)
-import Life.Shell (relativeToHome)
+import Life.Configuration (LifeConfiguration, directories, files, parseGlobalLife, writeGlobalLife)
+import Life.Github (removeFromRepo)
+import Life.Message (abortCmd, warningMessage)
+import Life.Shell (LifeExistence (..), whatIsLife)
 
 import qualified Data.Set as Set
 
 -- | Remove path from existing life-configuration file.
 lifeRemove :: FilePath -> IO ()
-lifeRemove path = do
-    -- check for .life existence
-    isLifeFile <- doesFileExist =<< relativeToHome lifePath
-    -- check for dotfiles existence
-    isDotDir   <- doesRepoExist
+lifeRemove path = whatIsLife >>= \case
+    -- if one of them is missing -- abort
+    NoLife -> abortCmd "remove" ".life and docfiles/ do not exist"
+    OnlyLife _ -> abortCmd "remove" "dotfiles/ directory doesn't exist"
+    OnlyRepo _ -> abortCmd "remove" ".life file doesn't exist"
+    -- actual life remove process
+    Both _ _ -> do
+        let filePath = parseRelFile @Maybe path
+        let dirPath  = parseRelDir  @Maybe path
 
-    case (isLifeFile, isDotDir) of
-        -- if one of them is missing -- abort
-        (True, False)  -> abortLifeRemove "dotfiles/ directory doesn't exist"
-        (False, True)  -> abortLifeRemove ".life file doesn't exist"
-        (False, False) -> abortLifeRemove ".life and docfiles/ do not exist"
-         -- actual life remove process
-        (True, True)   -> do
-            let filePath = parseRelFile @Maybe path
-            let dirPath  = parseRelDir  @Maybe path
-
-            case (filePath, dirPath) of
-                (Nothing, Nothing) -> abortLifeRemove $ toText path  <> " is neither file nor directory"
-                (Just relFile, Nothing) -> resolveConfiguration files removeFile relFile
-                (Nothing, Just relDir) -> resolveConfiguration directories removeDirRecur relDir
-                _ -> error "File and dir at the same time"
-  where
-    abortLifeRemove :: Text -> IO ()
-    abortLifeRemove message = do
-        warningMessage message
-        errorMessage "Aborting 'life remove' command."
-        exitFailure
-
+        case (filePath, dirPath) of
+            (Nothing, Nothing) -> abortCmd "remove" $ toText path  <> " is neither file nor directory"
+            (Just relFile, Nothing) -> resolveConfiguration files removeFile relFile
+            (Nothing, Just relDir) -> resolveConfiguration directories removeDirRecur relDir
+            _ -> error "File and dir at the same time"
 
 resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
                      -> (Path Rel t -> IO ()) -- ^ function to remove object
