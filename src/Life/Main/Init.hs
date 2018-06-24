@@ -63,11 +63,11 @@ lifeInit owner = do
 
         unless (noExist == mempty) $ do
             infoMessage "The following files and directories weren't found (so just ignoring them):"
-            skipMessage $ renderLifeConfiguration noExist
+            skipMessage $ renderLifeConfiguration False noExist
 
         unless (exist == mempty) $ do
             infoMessage "Found the following files and directories:"
-            successMessage $ renderLifeConfiguration exist
+            successMessage $ renderLifeConfiguration False exist
 
         useDiscovered <- chooseYesNo "Would you like to add all discovered existing files and directories to .life configuration?"
         let lifeConfig = singleFileConfig lifePath <> (if useDiscovered then exist else mempty)

@@ -22,13 +22,16 @@ module Life.Configuration
        , files
        , directories
 
-         -- * Parse and render 'LifeConfiguration' under `~/.life`
+         -- * Parse 'LifeConfiguration' under @~/.life@
        , parseGlobalLife
        , parseLifeConfiguration
+
+         -- * Render 'LifeConfiguration' under @~/.life@
        , renderLifeConfiguration
        , writeGlobalLife
        ) where
 
+import Data.Maybe (maybeToList)
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
 import Path (Dir, File, Path, Rel, fromAbsFile, mkRelFile, parseRelDir, parseRelFile, toFilePath)
@@ -104,18 +107,22 @@ resurrect CorpseConfiguration{..} = do
 
 -- TODO: should tomland one day support this?...
 -- | Converts 'LifeConfiguration' into TOML file.
-renderLifeConfiguration :: LifeConfiguration -> Text
-renderLifeConfiguration LifeConfiguration{..} = mconcat
-    [ render "files      " lifeConfigurationFiles
-    , "\n"
-    , render "directories" lifeConfigurationDirectories
-    ]
+renderLifeConfiguration :: Bool  -- ^ True to see empty entries in output
+                        -> LifeConfiguration
+                        -> Text
+renderLifeConfiguration printIfEmpty LifeConfiguration{..} = mconcat $
+    maybeToList (render "directories" lifeConfigurationDirectories)
+ ++ [ "\n" ]
+ ++ maybeToList (render "files" lifeConfigurationFiles)
   where
-    render :: Text -> Set (Path b t) -> Text
+    render :: Text -> Set (Path b t) -> Maybe Text
     render key paths = do
         let prefix = key <> " = "
         let array  = renderStringArray (length prefix) (map show $ toList paths)
-        prefix <> array
+
+        if not printIfEmpty && null paths
+        then Nothing
+        else Just $ prefix <> array
 
     renderStringArray :: Int -> [String] -> Text
     renderStringArray _ []     = "[]"
@@ -126,7 +133,7 @@ renderLifeConfiguration LifeConfiguration{..} = mconcat
 writeGlobalLife :: LifeConfiguration -> IO ()
 writeGlobalLife config = do
     lifeFilePath <- relativeToHome lifePath
-    writeFile (fromAbsFile lifeFilePath) (renderLifeConfiguration config)
+    writeFile (fromAbsFile lifeFilePath) (renderLifeConfiguration True config)
 
 ----------------------------------------------------------------------------
 -- Life configuration parsing
