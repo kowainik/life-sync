@@ -41,7 +41,7 @@ commandParser = subparser $
                   (fullDesc <> progDesc "Remove file or directory from the life configuration."))
  <> command "push"
             (info (helper <*> pure Push)
-                  (fullDesc <> progDesc "Updates GitHub repository with the life configuration."))
+                  (fullDesc <> progDesc "Updates GitHub repository from local state and push the latest version."))
 
 
 optionsInfo :: ParserInfo LifeCommand
