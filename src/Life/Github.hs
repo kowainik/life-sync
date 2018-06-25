@@ -10,6 +10,7 @@ module Life.Github
        , insideRepo
 
          -- * Repository manipulation commands
+       , addToRepo
        , createRepository
        , updateDotfilesRepo
        , removeFromRepo
@@ -92,7 +93,24 @@ copyPathList copyAction pathList = do
         let copyDestination = repoDir </> entryPath
         copyAction copySource copyDestination
 
--- | Removes file or directory form the repository and commits
+-- | Adds file or directory to the repository and commits
+addToRepo :: (Path Abs t -> Path Abs t -> IO ()) -> Path Rel t -> IO ()
+addToRepo copyFun path = do
+    -- copy file
+    sourcePath <- relativeToHome path
+    destinationPath <- relativeToHome (repoName </> path)
+    copyFun sourcePath destinationPath
+
+    -- update .life file
+    lifeFile <- relativeToHome lifePath
+    repoLifeFile <- relativeToHome (repoName </> lifePath)
+    copyFile lifeFile repoLifeFile
+
+    let commitMsg = "Add: " <> toText (toFilePath path)
+    infoMessage commitMsg
+    pushRepo commitMsg
+
+-- | Removes file or directory from the repository and commits
 removeFromRepo :: (Path Abs t -> IO ()) -> Path Rel t -> IO ()
 removeFromRepo removeFun path = do
     absPath <- relativeToHome (repoName </> path)

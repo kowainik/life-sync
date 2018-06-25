@@ -35,6 +35,7 @@ library
 
   build-depends:       base-noprelude >= 4.9 && < 5
                      , ansi-terminal
+                     , bytestring
                      , containers
                      , fmt
                      , microlens-platform
