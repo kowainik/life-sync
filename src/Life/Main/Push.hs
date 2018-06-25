@@ -6,7 +6,7 @@ module Life.Main.Push
        ( lifePush
        ) where
 
-import Path (Path, Rel, toFilePath, (</>))
+import Path (Abs, Path, Rel, toFilePath, (</>))
 import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
 
 import Life.Configuration (LifeConfiguration (..), directories, files, lifeConfigMinus,
@@ -55,8 +55,8 @@ lifePush = whatIsLife >>= \case
             <$> checkPaths eFiles
             <*> checkPaths eDirs
       where
-        withExist :: (Path r f -> IO Bool) -> Path r f -> IO (Path r f, Bool)
-        withExist doesExist path = (path,) <$> doesExist path
+        withExist :: (Path Abs f -> IO Bool) -> Path Rel f -> IO (Path Rel f, Bool)
+        withExist doesExist path = (path,) <$> (relativeToHome path >>= doesExist)
 
         checkPaths :: [(Path Rel f, Bool)] -> Validation [Text] (Set (Path Rel f))
         checkPaths = fmap Set.fromList . traverse checkPath

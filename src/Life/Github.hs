@@ -69,6 +69,7 @@ updateDotfilesRepo :: Text -> LifeConfiguration -> IO ()
 updateDotfilesRepo commitMsg LifeConfiguration{..} = do
     copyFiles (toList lifeConfigurationFiles)
     copyDirs  (toList lifeConfigurationDirectories)
+    infoMessage commitMsg
     pushRepo commitMsg
 
 -- | Copy files to repository and push changes to remote repository.
