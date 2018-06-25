@@ -4,6 +4,7 @@
 
 module Life.Main.Init
        ( lifeInit
+       , lifeInitQuestion
        ) where
 
 import Path (Abs, File, Path, mkRelFile)
@@ -11,9 +12,9 @@ import Path.IO (copyFile, doesDirExist, doesFileExist)
 
 import Life.Configuration (LifeConfiguration (..), renderLifeConfiguration, singleFileConfig,
                            writeGlobalLife)
-import Life.Github (Owner, Repo (Repo), createRepository, insideRepo)
-import Life.Message (abortCmd, chooseYesNo, infoMessage, skipMessage, successMessage,
-                     warningMessage)
+import Life.Github (Owner (..), Repo (Repo), createRepository, insideRepo)
+import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
+                     successMessage, warningMessage)
 import Life.Shell (LifeExistence (..), createDirInHome, lifePath, relativeToHome, repoName,
                    whatIsLife)
 
@@ -92,3 +93,20 @@ partitionM check = foldM partitionAction ([], [])
     partitionAction (ifTrue, ifFalse) a = check a >>= \case
         True  -> pure (a : ifTrue, ifFalse)
         False -> pure (ifTrue, a : ifFalse)
+
+
+-- | If @.life@ and @dotfiles@ are not present you could want
+-- to ask one if it needed to be initialised.
+lifeInitQuestion :: Text  -- ^ Command name
+                 -> IO () -- ^ Process to do
+                 -> IO ()
+lifeInitQuestion cmd process = do
+    warningMessage ".life file and dotfiles/ do not exist"
+    toInit <- chooseYesNo "Would you like to proceed initialization process?"
+    if toInit then do
+        infoMessage "Initialization process starts.."
+        skipMessage "Insert your GitHub username:"
+        owner <- promptNonEmpty
+        lifeInit $ Owner owner
+        process
+    else abortCmd cmd "'~/.life' file is not initialized"
