@@ -21,6 +21,7 @@ data LifeCommand
     = Init   InitOptions
     | Add    PathOptions
     | Remove PathOptions
+    | Push
     deriving (Show)
 
 ---------------------------------------------------------------------------
@@ -38,6 +39,10 @@ commandParser = subparser $
  <> command "remove"
             (info (helper <*> fmap Remove pathOptionsParser)
                   (fullDesc <> progDesc "Remove file or directory from the life configuration."))
+ <> command "push"
+            (info (helper <*> pure Push)
+                  (fullDesc <> progDesc "Updates GitHub repository with the life configuration."))
+
 
 optionsInfo :: ParserInfo LifeCommand
 optionsInfo = info

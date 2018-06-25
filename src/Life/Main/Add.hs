@@ -12,10 +12,9 @@ import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, 
 
 import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseGlobalLife,
                            writeGlobalLife)
-import Life.Github (Owner (..), addToRepo)
-import Life.Main.Init (lifeInit)
-import Life.Message (abortCmd, chooseYesNo, errorMessage, infoMessage, promptNonEmpty, skipMessage,
-                     warningMessage)
+import Life.Github (addToRepo)
+import Life.Main.Init (lifeInitQuestion)
+import Life.Message (abortCmd, errorMessage, infoMessage, warningMessage)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
 
 import qualified Data.ByteString.Lazy as LBS
@@ -32,16 +31,7 @@ lifeAdd lPath = whatIsLife >>= \case
     OnlyLife _ -> abortCmd "add" "dotfiles/ directory doesn't exist"
 
     -- if both .life and dotfiles doesn't exist go to init process
-    NoLife -> do
-        warningMessage ".life file and dotfiles/ do not exist"
-        toInit <- chooseYesNo "Would you like to proceed initialization process?"
-        if toInit then do
-            infoMessage "Initialization process starts.."
-            skipMessage "Insert your GitHub username:"
-            owner <- promptNonEmpty
-            lifeInit $ Owner owner
-            addingProcess
-        else abortCmd "add" "Can't execute 'life add' if '~/.life' file is not initialized"
+    NoLife -> lifeInitQuestion "add" addingProcess
   where
     addingProcess :: IO ()
     addingProcess = do

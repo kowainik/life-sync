@@ -14,6 +14,8 @@ module Life.Configuration
        , singleDirConfig
        , singleFileConfig
 
+       , lifeConfigMinus
+
 --         -- * Parsing exceptions
 --       , ParseLifeException (..)
 
@@ -23,6 +25,7 @@ module Life.Configuration
 
          -- * Parse 'LifeConfiguration' under @~/.life@
        , parseGlobalLife
+       , parseRepoLife
        , parseLifeConfiguration
 
          -- * Render 'LifeConfiguration' under @~/.life@
@@ -33,10 +36,10 @@ module Life.Configuration
 import Data.Maybe (maybeToList)
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
-import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath)
+import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))
 import Toml (BiToml, Valuer (..), (.=))
 
-import Life.Shell (lifePath, relativeToHome)
+import Life.Shell (lifePath, relativeToHome, repoName)
 
 import qualified Data.Set as Set
 import qualified Text.Show as Show
@@ -77,6 +80,17 @@ singleFileConfig file = mempty & files .~ one file
 
 singleDirConfig :: Path Rel Dir -> LifeConfiguration
 singleDirConfig dir = mempty & directories .~ one dir
+
+----------------------------------------------------------------------------
+-- LifeConfiguration difference
+----------------------------------------------------------------------------
+
+lifeConfigMinus :: LifeConfiguration -- ^ repo .life config
+                -> LifeConfiguration -- ^ global config
+                -> LifeConfiguration -- ^ configs that are not in global
+lifeConfigMinus dotfiles global = LifeConfiguration
+    (Set.difference (dotfiles ^. files) (global ^. files))
+    (Set.difference (dotfiles ^. directories) (global ^. directories))
 
 ----------------------------------------------------------------------------
 -- Toml parser for life configuration
@@ -147,6 +161,11 @@ parseLifeConfiguration tomlText = case Toml.decode corpseConfiguationT tomlText 
 -- | Reads 'LifeConfiguration' from @~\/.life@ file.
 parseGlobalLife :: IO LifeConfiguration
 parseGlobalLife = relativeToHome lifePath >>= readFile . fromAbsFile >>= parseLifeConfiguration
+
+parseRepoLife :: IO LifeConfiguration
+parseRepoLife = relativeToHome (repoName </> lifePath)
+    >>= readFile . fromAbsFile
+    >>= parseLifeConfiguration
 
 data LoadTomlException = LoadTomlException FilePath Text
 

@@ -31,7 +31,9 @@ library
                        Life.Shell
                        Life.Main.Add
                        Life.Main.Init
+                       Life.Main.Push
                        Life.Main.Remove
+                       Life.Validation
 
   build-depends:       base-noprelude >= 4.9 && < 5
                      , ansi-terminal
