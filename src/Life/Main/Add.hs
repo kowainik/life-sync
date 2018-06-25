@@ -1,19 +1,25 @@
+{-# LANGUAGE Rank2Types #-}
+
 -- | Functions to add file/directory to your life.
 
 module Life.Main.Add
        ( lifeAdd
        ) where
 
-import Path (Path, Rel, dirname, filename, toFilePath)
-import Path.IO (doesDirExist, doesFileExist, getHomeDir, makeRelative, resolveDir, resolveFile)
+import Path (Abs, Dir, File, Path, Rel, parent, toFilePath, (</>))
+import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, getHomeDir,
+                makeRelative, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, LifePath (..), parseGlobalLife, singleDirConfig,
-                           singleFileConfig, writeGlobalLife)
-import Life.Github (Owner (..), updateDotfilesRepo)
+import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseGlobalLife,
+                           writeGlobalLife)
+import Life.Github (Owner (..), addToRepo)
 import Life.Main.Init (lifeInit)
 import Life.Message (abortCmd, chooseYesNo, errorMessage, infoMessage, promptNonEmpty, skipMessage,
                      warningMessage)
-import Life.Shell (LifeExistence (..), whatIsLife)
+import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
+
+import qualified Data.ByteString.Lazy as LBS
+import qualified Data.Set as Set
 
 -- | Add path to existing life-configuration file.
 lifeAdd :: LifePath -> IO ()
@@ -45,28 +51,51 @@ lifeAdd lPath = whatIsLife >>= \case
                 filePath <- resolveFile homeDirPath path
                 whenM (doesFileExist filePath) $ do
                     relativeFile <- makeRelative homeDirPath filePath
-                    resolveConfiguration singleFileConfig filename relativeFile
+                    resolveConfiguration files checkEqualFiles copyFileWithDir relativeFile
 
             (Dir path)  -> do
                 dirPath <- resolveDir homeDirPath path
                 whenM (doesDirExist dirPath) $ do
                     relativeDir <- makeRelative homeDirPath dirPath
-                    resolveConfiguration singleDirConfig dirname relativeDir
+                    resolveConfiguration directories checkEqualDirs copyDirRecur relativeDir
 
             -- We didn't find the file
         errorMessage "The file/directory doesn't exist" >> exitFailure
 
-
-resolveConfiguration :: (Path Rel t -> LifeConfiguration)
-                     -> (Path Rel t -> Path Rel t)
+resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
+                     -> (Path Rel t -> IO Bool)
+                     -> (Path Abs t -> Path Abs t -> IO ())
                      -> Path Rel t
                      -> IO ()
-resolveConfiguration configBuilder pathName path = do
+resolveConfiguration confLens checkContent copyFun path = do
     configuration <- parseGlobalLife
-    let newConfiguration = configuration <> configBuilder path
-    writeGlobalLife newConfiguration
+    let newConfiguration = configuration & confLens %~ Set.insert path
 
-    let pathTextName = toText $ toFilePath $ pathName path
-    let commitMsg    = "Add: " <> pathTextName
-    updateDotfilesRepo commitMsg newConfiguration
+    isSameAsInRepo <- checkContent path
+    if isSameAsInRepo then do
+        let pathText = toText $ toFilePath path
+        infoMessage $ "Path " <> pathText <> " is already latest version in repository"
+    else do
+        writeGlobalLife newConfiguration
+        addToRepo copyFun path
+
     exitSuccess
+
+checkEqualFiles :: Path Rel File -> IO Bool
+checkEqualFiles path = do
+    homeFilePath <- relativeToHome path
+    repoFilePath <- relativeToHome (repoName </> path)
+
+    originContent <- LBS.readFile $ toFilePath homeFilePath
+    repoContent <- LBS.readFile $ toFilePath repoFilePath
+
+    pure $ originContent == repoContent
+
+checkEqualDirs :: Path Rel Dir -> IO Bool
+checkEqualDirs _ = do
+    warningMessage "TODO: check directories to be equal"
+    pure True
+
+-- | Just like 'copyFile' but also creates directory for second file.
+copyFileWithDir :: Path Abs File -> Path Abs File -> IO ()
+copyFileWithDir from to = ensureDir (parent to) >> copyFile from to
