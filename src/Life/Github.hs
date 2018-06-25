@@ -93,7 +93,7 @@ copyPathList copyAction pathList = do
         let copyDestination = repoDir </> entryPath
         copyAction copySource copyDestination
 
--- | Adds file or directory from the repository and commits
+-- | Adds file or directory to the repository and commits
 addToRepo :: (Path Abs t -> Path Abs t -> IO ()) -> Path Rel t -> IO ()
 addToRepo copyFun path = do
     -- copy file

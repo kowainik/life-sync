@@ -86,10 +86,15 @@ checkEqualFiles path = do
     homeFilePath <- relativeToHome path
     repoFilePath <- relativeToHome (repoName </> path)
 
-    originContent <- LBS.readFile $ toFilePath homeFilePath
-    repoContent <- LBS.readFile $ toFilePath repoFilePath
+    isRepoFile <- doesFileExist repoFilePath
+    if isRepoFile then do
+        originContent <- LBS.readFile $ toFilePath homeFilePath
+        repoContent <- LBS.readFile $ toFilePath repoFilePath
 
-    pure $ originContent == repoContent
+        pure $ originContent == repoContent
+    else
+        pure False
+
 
 checkEqualDirs :: Path Rel Dir -> IO Bool
 checkEqualDirs _ = do
