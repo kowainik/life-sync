@@ -79,10 +79,10 @@ withSynced action = insideRepo $ do
         infoMessage "Repo is up-to-date"
         action
     else do
-        warningMessage "Local version of repository is old"
+        warningMessage "Local version of repository is out of date"
         shouldSync <- chooseYesNo "Do you want to sync repo with remote?"
         if shouldSync then do
-            "git" ["pull"]  -- TODO: some other command?
+            "git" ["rebase", "origin/master"]
             action
         else do
             errorMessage "Aborting current command because repository is not synchronized with remote"
