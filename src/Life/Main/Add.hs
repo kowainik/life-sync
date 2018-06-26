@@ -12,7 +12,7 @@ import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, 
 
 import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseGlobalLife,
                            writeGlobalLife)
-import Life.Github (addToRepo)
+import Life.Github (addToRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, errorMessage, infoMessage, warningMessage)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
@@ -24,7 +24,7 @@ import qualified Data.Set as Set
 lifeAdd :: LifePath -> IO ()
 lifeAdd lPath = whatIsLife >>= \case
     -- actual life add process
-    Both _ _ -> addingProcess
+    Both _ _ -> withSynced addingProcess
 
     -- if one of them is missing -- abort
     OnlyRepo _ -> abortCmd "add" ".life file doesn't exist"

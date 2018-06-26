@@ -8,6 +8,8 @@ module Life.Github
 
          -- * Repository utils
        , insideRepo
+       , checkRemoteSync
+       , withSynced
 
          -- * Repository manipulation commands
        , addToRepo
@@ -22,8 +24,8 @@ import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 import System.IO.Error (IOError, isDoesNotExistError)
 
 import Life.Configuration (LifeConfiguration (..))
-import Life.Message (errorMessage, infoMessage)
-import Life.Shell (lifePath, relativeToHome, repoName)
+import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
+import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
 newtype Owner = Owner { getOwner :: Text } deriving (Show)
 newtype Repo  = Repo  { getRepo  :: Text } deriving (Show)
@@ -60,6 +62,31 @@ insideRepo action = do
 -- | Commits all changes inside 'repoName' and pushes to remote.
 pushRepo :: Text -> IO ()
 pushRepo = insideRepo . pushka
+
+-- | Returns true if local @dotfiles@ repository is synchronized with remote repo.
+checkRemoteSync :: IO Bool
+checkRemoteSync = do
+    "git" ["fetch", "origin", "master"]
+    localHash  <- "git" $| ["rev-parse", "master"]
+    remoteHash <- "git" $| ["rev-parse", "origin/master"]
+    pure $ localHash == remoteHash
+
+withSynced :: IO a -> IO a
+withSynced action = insideRepo $ do
+    infoMessage "Checking if repo is synchnorized..."
+    isSynced <- checkRemoteSync
+    if isSynced then do
+        infoMessage "Repo is up-to-date"
+        action
+    else do
+        warningMessage "Local version of repository is old"
+        shouldSync <- chooseYesNo "Do you want to sync repo with remote?"
+        if shouldSync then do
+            "git" ["pull"]  -- TODO: some other command?
+            action
+        else do
+            errorMessage "Aborting current command because repository is not synchronized with remote"
+            exitFailure
 
 ----------------------------------------------------------------------------
 -- File manipulation
