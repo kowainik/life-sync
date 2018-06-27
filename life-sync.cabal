@@ -31,6 +31,7 @@ library
                        Life.Shell
                        Life.Main.Add
                        Life.Main.Init
+                       Life.Main.Pull
                        Life.Main.Push
                        Life.Main.Remove
                        Life.Validation
@@ -65,8 +66,10 @@ executable life
   ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
 
   build-depends:       base-noprelude
+                     , containers
                      , life-sync
                      , optparse-applicative
+                     , path
 
   default-language:    Haskell2010
 

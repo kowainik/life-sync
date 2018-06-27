@@ -10,7 +10,7 @@ import Path (Abs, Path, Rel, toFilePath, (</>))
 import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
 
 import Life.Configuration (LifeConfiguration (..), directories, files, lifeConfigMinus,
-                           parseGlobalLife, parseRepoLife)
+                           parseHomeLife, parseRepoLife)
 import Life.Github (updateDotfilesRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd)
@@ -30,7 +30,7 @@ lifePush = whatIsLife >>= \case
     pushProcess :: IO ()
     pushProcess = do
         -- check that all from .life exist
-        globalConf <- parseGlobalLife
+        globalConf <- parseHomeLife
         checkLife globalConf >>= \case
             Failure msgs -> abortCmd "push" $ "Following files/directories are missing:\n"
                                            <> Text.intercalate "\n" msgs
