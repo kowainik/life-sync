@@ -15,6 +15,7 @@ module Life.Github
          -- * Repository manipulation commands
        , addToRepo
        , createRepository
+       , pullUpdateFromRepo
        , removeFromRepo
        , updateDotfilesRepo
        , updateFromRepo
@@ -104,11 +105,15 @@ withSynced action = insideRepo $ do
 
 data CopyDirection = FromHomeToRepo | FromRepoToHome
 
-updateFromRepo :: Set (Path Rel File) -> Set (Path Rel Dir) -> IO ()
-updateFromRepo withoutFiles withoutDirs = insideRepo $ do
+pullUpdateFromRepo :: LifeConfiguration -> IO ()
+pullUpdateFromRepo life = do
+    "git" ["pull", "-r"]
+    updateFromRepo life
+
+updateFromRepo :: LifeConfiguration -> IO ()
+updateFromRepo excludeLife = insideRepo $ do
     infoMessage "Copying files from repo to local machine..."
 
-    let excludeLife = LifeConfiguration withoutFiles withoutDirs
     repoLife <- parseRepoLife
     let lifeToLive = lifeConfigMinus repoLife excludeLife
 
