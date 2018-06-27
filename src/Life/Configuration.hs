@@ -24,7 +24,7 @@ module Life.Configuration
        , directories
 
          -- * Parse 'LifeConfiguration' under @~/.life@
-       , parseGlobalLife
+       , parseHomeLife
        , parseRepoLife
        , parseLifeConfiguration
 
@@ -158,14 +158,18 @@ parseLifeConfiguration tomlText = case Toml.decode corpseConfiguationT tomlText 
     Left err  -> throwM $ LoadTomlException (toFilePath lifePath) $ Toml.prettyException err
     Right cfg -> resurrect cfg
 
--- | Reads 'LifeConfiguration' from @~\/.life@ file.
-parseGlobalLife :: IO LifeConfiguration
-parseGlobalLife = relativeToHome lifePath >>= readFile . fromAbsFile >>= parseLifeConfiguration
+parseLife :: Path Rel File -> IO LifeConfiguration
+parseLife path = relativeToHome path
+             >>= readFile . fromAbsFile
+             >>= parseLifeConfiguration
 
+-- | Reads 'LifeConfiguration' from @~\/.life@ file.
+parseHomeLife :: IO LifeConfiguration
+parseHomeLife = parseLife lifePath
+
+-- | Reads 'LifeConfiguration' from @~\/dotfiles\/.life@ file.
 parseRepoLife :: IO LifeConfiguration
-parseRepoLife = relativeToHome (repoName </> lifePath)
-    >>= readFile . fromAbsFile
-    >>= parseLifeConfiguration
+parseRepoLife = parseLife (repoName </> lifePath)
 
 data LoadTomlException = LoadTomlException FilePath Text
 

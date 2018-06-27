@@ -9,7 +9,7 @@ module Life.Main.Remove
 import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseGlobalLife,
+import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseHomeLife,
                            writeGlobalLife)
 import Life.Github (removeFromRepo, withSynced)
 import Life.Message (abortCmd, warningMessage)
@@ -40,7 +40,7 @@ resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
                      -> Path Rel t
                      -> IO ()
 resolveConfiguration confLens removeFun path = do
-    configuration <- parseGlobalLife
+    configuration <- parseHomeLife
 
     let newConfiguration = configuration & confLens %~ Set.delete path
     if configuration == newConfiguration

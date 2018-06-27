@@ -10,7 +10,7 @@ import Path (Abs, Dir, File, Path, Rel, parent, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, getHomeDir,
                 makeRelative, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseGlobalLife,
+import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseHomeLife,
                            writeGlobalLife)
 import Life.Github (addToRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
@@ -58,7 +58,7 @@ resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
                      -> Path Rel t
                      -> IO ()
 resolveConfiguration confLens checkContent copyFun path = do
-    configuration <- parseGlobalLife
+    configuration <- parseHomeLife
     let newConfiguration = configuration & confLens %~ Set.insert path
 
     isSameAsInRepo <- checkContent path

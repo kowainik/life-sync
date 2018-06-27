@@ -7,15 +7,17 @@ module Life.Github
        , Repo  (..)
 
          -- * Repository utils
-       , insideRepo
        , checkRemoteSync
+       , cloneRepo
+       , insideRepo
        , withSynced
 
          -- * Repository manipulation commands
        , addToRepo
        , createRepository
-       , updateDotfilesRepo
        , removeFromRepo
+       , updateDotfilesRepo
+       , updateFromRepo
        ) where
 
 import Control.Exception (throwIO)
@@ -23,7 +25,7 @@ import Path (Abs, Dir, File, Path, Rel, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 import System.IO.Error (IOError, isDoesNotExistError)
 
-import Life.Configuration (LifeConfiguration (..))
+import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLife)
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
@@ -63,6 +65,14 @@ insideRepo action = do
 pushRepo :: Text -> IO ()
 pushRepo = insideRepo . pushka
 
+-- | Clones @dotfiles@ repository assuming it doesn't exist.
+cloneRepo :: Owner -> IO ()
+cloneRepo (Owner owner) = do
+    homeDir <- getHomeDir
+    withCurrentDir homeDir $ do
+        infoMessage "Using SSH to clone repo..."
+        "git" ["clone", "git@github.com:" <> owner <> "/dotfiles.git"]
+
 -- | Returns true if local @dotfiles@ repository is synchronized with remote repo.
 checkRemoteSync :: IO Bool
 checkRemoteSync = do
@@ -92,34 +102,54 @@ withSynced action = insideRepo $ do
 -- File manipulation
 ----------------------------------------------------------------------------
 
+data CopyDirection = FromHomeToRepo | FromRepoToHome
+
+updateFromRepo :: Set (Path Rel File) -> Set (Path Rel Dir) -> IO ()
+updateFromRepo withoutFiles withoutDirs = insideRepo $ do
+    infoMessage "Copying files from repo to local machine..."
+
+    let excludeLife = LifeConfiguration withoutFiles withoutDirs
+    repoLife <- parseRepoLife
+    let lifeToLive = lifeConfigMinus repoLife excludeLife
+
+    copyLife FromRepoToHome lifeToLive
+
 updateDotfilesRepo :: Text -> LifeConfiguration -> IO ()
-updateDotfilesRepo commitMsg LifeConfiguration{..} = do
-    copyFiles (toList lifeConfigurationFiles)
-    copyDirs  (toList lifeConfigurationDirectories)
-    infoMessage commitMsg
+updateDotfilesRepo commitMsg life = do
+    copyLife FromHomeToRepo life
+    infoMessage commitMsg  -- TODO: remove after printing whole command
     pushRepo commitMsg
 
+copyLife :: CopyDirection -> LifeConfiguration -> IO ()
+copyLife direction LifeConfiguration{..} = do
+    copyFiles direction (toList lifeConfigurationFiles)
+    copyDirs  direction (toList lifeConfigurationDirectories)
+
 -- | Copy files to repository and push changes to remote repository.
-copyFiles :: [Path Rel File] -> IO ()
+copyFiles :: CopyDirection -> [Path Rel File] -> IO ()
 copyFiles = copyPathList copyFile
 
 -- | Copy dirs to repository.
-copyDirs :: [Path Rel Dir] -> IO ()
+copyDirs :: CopyDirection -> [Path Rel Dir] -> IO ()
 copyDirs = copyPathList copyDirRecur
 
 copyPathList :: (Path Abs t -> Path Abs t -> IO ())
              -- ^ Copying action
+             -> CopyDirection
+             -- ^ Describes in which direction files should be copied
              -> [Path Rel t]
              -- ^ List of paths to copy
              -> IO ()
-copyPathList copyAction pathList = do
+copyPathList copyAction direction pathList = do
     homeDir    <- getHomeDir
     let repoDir = homeDir </> repoName
 
     for_ pathList $ \entryPath -> do
-        let copySource      = homeDir </> entryPath
-        let copyDestination = repoDir </> entryPath
-        copyAction copySource copyDestination
+        let homePath = homeDir </> entryPath
+        let repoPath = repoDir </> entryPath
+        case direction of
+            FromHomeToRepo -> copyAction homePath repoPath
+            FromRepoToHome -> copyAction repoPath homePath
 
 -- | Adds file or directory to the repository and commits
 addToRepo :: (Path Abs t -> Path Abs t -> IO ()) -> Path Rel t -> IO ()

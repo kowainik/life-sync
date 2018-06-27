@@ -1,3 +1,4 @@
+{-# LANGUAGE MultiWayIf   #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module Life.Message
@@ -13,6 +14,7 @@ module Life.Message
        , abortCmd
 
          -- * Questions
+       , choose
        , chooseYesNo
        ) where
 
@@ -21,6 +23,7 @@ import System.Console.ANSI (Color (..), ColorIntensity (Vivid), ConsoleIntensity
 import System.IO (hFlush)
 
 import qualified Data.Text as T
+import qualified Universum.Unsafe as Unsafe
 
 ----------------------------------------------------------------------------
 -- Ansi-terminal
@@ -104,6 +107,16 @@ printQuestion question (def:rest) = do
     boldDefault def
     putTextLn $ "/" <> restSlash
 printQuestion question [] = putTextLn question
+
+choose :: Text -> [Text] -> IO Text
+choose question choices = do
+    printQuestion question choices
+    answer <- prompt
+    if | T.null answer -> pure (Unsafe.head choices)
+       | T.toLower answer `elem` choices -> pure answer
+       | otherwise -> do
+           errorMessage "This wasn't a valid choice."
+           choose question choices
 
 data Answer = Y | N
 
