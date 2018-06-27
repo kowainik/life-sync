@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 -- | Utilities to work with GitHub repositories using "hub".
 
 module Life.Github
@@ -134,7 +132,6 @@ updateFromRepo excludeLife = insideRepo $ do
 updateDotfilesRepo :: Text -> LifeConfiguration -> IO ()
 updateDotfilesRepo commitMsg life = do
     copyLife FromHomeToRepo life
-    infoMessage commitMsg  -- TODO: remove after printing whole command
     pushRepo commitMsg
 
 copyLife :: CopyDirection -> LifeConfiguration -> IO ()
@@ -182,7 +179,6 @@ addToRepo copyFun path = do
     copyFile lifeFile repoLifeFile
 
     let commitMsg = "Add: " <> toText (toFilePath path)
-    infoMessage commitMsg
     pushRepo commitMsg
 
 -- | Removes file or directory from the repository and commits
@@ -196,8 +192,7 @@ removeFromRepo removeFun path = do
     repoLifeFile <- relativeToHome (repoName </> lifePath)
     copyFile lifeFile repoLifeFile
 
-    let commitMsg    = "Remove: " <> pathTextName
-    infoMessage commitMsg
+    let commitMsg = "Remove: " <> pathTextName
     pushRepo commitMsg
   where
     pathTextName :: Text

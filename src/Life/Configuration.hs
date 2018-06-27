@@ -33,7 +33,6 @@ module Life.Configuration
        , writeGlobalLife
        ) where
 
-import Data.Maybe (maybeToList)
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields)
 import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))
