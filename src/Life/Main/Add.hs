@@ -85,7 +85,6 @@ checkEqualFiles path = do
     else
         pure False
 
-
 checkEqualDirs :: Path Rel Dir -> IO Bool
 checkEqualDirs _ = do
     warningMessage "TODO: check directories to be equal"
