@@ -13,6 +13,8 @@ module Life.Github
        , withSynced
 
          -- * Repository manipulation commands
+       , CopyDirection (..)
+       , copyLife
        , addToRepo
        , createRepository
        , pullUpdateFromRepo
@@ -36,6 +38,16 @@ newtype Repo  = Repo  { getRepo  :: Text } deriving (Show)
 ----------------------------------------------------------------------------
 -- VSC commands
 ----------------------------------------------------------------------------
+
+askToPushka :: Text -> IO ()
+askToPushka commitMsg = do
+    "git" ["add", "."]
+    infoMessage "The following changes are going to be pushed:"
+    "git" ["diff", "--name-status", "HEAD"]
+    continue <- chooseYesNo "Would you like to proceed?"
+    if continue
+    then pushka commitMsg
+    else errorMessage "Abort pushing" >> exitFailure
 
 -- | Make a commit and push it.
 pushka :: Text -> IO ()
@@ -64,7 +76,7 @@ insideRepo action = do
 
 -- | Commits all changes inside 'repoName' and pushes to remote.
 pushRepo :: Text -> IO ()
-pushRepo = insideRepo . pushka
+pushRepo = insideRepo . askToPushka
 
 -- | Clones @dotfiles@ repository assuming it doesn't exist.
 cloneRepo :: Owner -> IO ()
@@ -107,7 +119,7 @@ data CopyDirection = FromHomeToRepo | FromRepoToHome
 
 pullUpdateFromRepo :: LifeConfiguration -> IO ()
 pullUpdateFromRepo life = do
-    "git" ["pull", "-r"]
+    insideRepo $ "git" ["pull", "-r"]
     updateFromRepo life
 
 updateFromRepo :: LifeConfiguration -> IO ()

@@ -7,12 +7,13 @@ module Life.Main.Init
        , lifeInitQuestion
        ) where
 
-import Path (Abs, File, Path, mkRelFile)
-import Path.IO (copyFile, doesDirExist, doesFileExist)
+import Path (mkRelFile)
+import Path.IO (doesDirExist, doesFileExist)
 
-import Life.Configuration (LifeConfiguration (..), renderLifeConfiguration, singleFileConfig,
-                           writeGlobalLife)
-import Life.Github (Owner (..), Repo (Repo), createRepository, insideRepo)
+import Life.Configuration (LifeConfiguration (..), parseHomeLife, renderLifeConfiguration,
+                           singleFileConfig, writeGlobalLife)
+import Life.Github (CopyDirection (..), Owner (..), Repo (Repo), copyLife, createRepository,
+                    insideRepo)
 import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
                      successMessage, warningMessage)
 import Life.Shell (LifeExistence (..), createDirInHome, lifePath, relativeToHome, repoName,
@@ -36,18 +37,18 @@ predefinedLifeConfig = mempty
 
 lifeInit :: Owner -> IO ()
 lifeInit owner = whatIsLife >>= \case
-    NoLife -> createLifeFile >> (createDotfilesDir =<< relativeToHome lifePath)
-    OnlyLife lifeFile -> askCreateLife >> createDotfilesDir lifeFile
+    NoLife -> createLifeFile >>= createDotfilesDir
+    OnlyLife _ -> askCreateLife >>= createDotfilesDir
     OnlyRepo _ -> abortCmd "init" "'~/dotfiles' directory already exist"  -- TODO: initialize .life from repo? :thinking_suicide:
     Both _ _ -> abortCmd "init" "'~/.life' file and '~/.dotfiles' directory are already initialized"
   where
-    askCreateLife :: IO ()
+    askCreateLife :: IO LifeConfiguration
     askCreateLife = do
         warningMessage ".life file is already exist."
         useIt <- chooseYesNo "Would you like to use it?"
-        unless useIt createLifeFile
+        if useIt then parseHomeLife else createLifeFile
 
-    createLifeFile :: IO ()
+    createLifeFile :: IO LifeConfiguration
     createLifeFile = do
         infoMessage "Checking existence of some commonly used predefined files..."
         (exist, noExist) <- scanConfig predefinedLifeConfig
@@ -65,12 +66,13 @@ lifeInit owner = whatIsLife >>= \case
 
         infoMessage "Initializing global .life configuration file..."
         writeGlobalLife lifeConfig
+        pure lifeConfig
 
-    createDotfilesDir :: Path Abs File -> IO ()
-    createDotfilesDir lifeFile = do
+    createDotfilesDir :: LifeConfiguration -> IO ()
+    createDotfilesDir lifeConfig = do
         () <$ createDirInHome repoName
         insideRepo $ do
-            copyFile lifeFile lifePath
+            copyLife FromHomeToRepo lifeConfig
             createRepository owner (Repo "dotfiles")
 
 {- | Split given configuration into two:
