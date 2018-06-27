@@ -44,7 +44,10 @@ repoName = $(mkRelDir "dotfiles/")
 
 -- This is needed to be able to call commands by writing strings.
 instance (a ~ Text, b ~ ()) => IsString ([a] -> IO b) where
-    fromString cmd args = callCommand $ showCommandForUser cmd (map toString args)
+    fromString cmd args = do
+        let cmdStr = showCommandForUser cmd (map toString args)
+        putStrLn $ "⚙  " ++ cmdStr
+        callCommand cmdStr
 
 -- | Run shell command with given options and return stdout of executed command.
 infix 5 $|
