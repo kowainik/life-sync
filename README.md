@@ -14,24 +14,24 @@ repository with personal configs across multiple machines.
 You might have some configuration files with different settings for your system.
 For example:
 
-1. Preferred settings for your editors (Spacemacs, Vim etc.).
+1. Preferred settings for your editors (Spacemacs, Vim, etc.).
 2. Useful bash aliases and other miscellaneous shell settings.
 3. Git configuration.
 
-And much more! But sometimes you start working from new fresh machine without
-your settings, like in situations below:
+And much more! But sometimes you start working from a new fresh machine without
+your settings, like in these situations:
 
-1. You bought new PC or laptop.
+1. You bought a new PC or laptop.
 2. You might reinstall your system on your working machine.
-3. You was given new laptop at work.
+3. You were given a new laptop at work.
 
-Every time this happens you need to walk through tedious process of copying your
-data again. It's a well-known practice to
+Every time this happens, you need to walk through the tedious process of copying
+your data again. It's a well-known practice to
 [store configs in `dotfiles` GitHub repository](https://dotfiles.github.io/).
-And `life-sync` makes it much easier to maintain this repository! With single
-command your can copy every file and directory from `dotfiles` repository to
+And `life-sync` makes it much easier to maintain this repository! With a single
+command, your can copy every file and directory from `dotfiles` repository to
 your machine. Or update your remote `dotfiles` repository after multiple local
-changs to different files.
+changes to different files.
 
 ## Installation
 
@@ -57,7 +57,7 @@ $ source <(life --bash-completion-script `which life`)
 
 After installing `life-sync` you need to call command `life` with specified options:
 
-```shell
+```
 $ life --help
 Usage: life COMMAND
   life-sync synchronize your personal configs
@@ -76,43 +76,43 @@ Available commands:
                            GitHub repository.
 ```
 
-If some command takes path to file or directory, path should be specifed
-relative to home directory.
+If some command takes a path to a file or a directory as an argument, the path
+should be specifed relative to the home directory.
 
-`life-sync` stores structure of your `dotfiles` repository in its own file
+`life-sync` keeps the structure of your `dotfiles` repository in its own file
 called `.life` which is stored in `dotfiles` repository as well.
 
-You can see example of `dotfiles` repository maintained by `life-sync` here:
+You can see an example of `dotfiles` repository maintained by `life-sync` here:
 
 * [ChShersh/dotfiles](https://github.com/ChShersh/dotfiles)
 
-## Command examples
+## Examples
 
-### Creating `dotfiles` repository first time
+### Create `dotfiles` repository for the first time
 
-```shell
+```
 $ life init MyGithubName
 ```
 
 ### Track new file or directory
 
-To track file:
+To track a file:
 
-```shell
+```
 $ life add -f path/to/file/relative/from/home
 ```
 
-To track directory:
+To track a directory:
 
-```shell
+```
 $ life add -d path/to/dir/relative/from/home
 ```
 
-To stop tracking some file use `life remove` command instead.
+To stop tracking some file, use `life remove` command instead.
 
 ### Push all changes to remote repository
 
-```shell
+```
 $ life push
 ```
 
@@ -120,12 +120,12 @@ $ life push
 
 To pull every file and directory:
 
-```shell
+```
 $ life pull ChShersh
 ```
 
 To pull everything except some files or some directories:
 
-```shell
+```
 $ life pull ChShersh --no-file some/file --no-dir some/dir
 ```
