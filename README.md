@@ -19,7 +19,7 @@ For example:
 3. Git configuration.
 
 And much more! But sometimes you start working from a new fresh machine without
-havig your settings within touch, like in these situations:
+having your settings within touch, like in these situations:
 
 1. You bought a new PC or laptop.
 2. You might reinstall your system on your working machine.
@@ -82,8 +82,12 @@ Available commands:
   OWNER                    Your github user name
 
 `life add` usage: life add ((-f|--file FILE_PATH) | (-d|--dir DIRECTORY_PATH))
+  -f,--file FILE_PATH      File to add
+  -d,--dir FILE_PATH       Directory to add
 
 `life remove` usage: life remove ((-f|--file FILE_PATH) | (-d|--dir DIRECTORY_PATH))
+  -f,--file FILE_PATH      File to remove
+  -d,--dir FILE_PATH       Directory to remote
 
 `life push` usage: life push
 
