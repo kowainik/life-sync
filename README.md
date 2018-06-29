@@ -6,7 +6,7 @@
 [![Stackage LTS](http://stackage.org/package/life-sync/badge/lts)](http://stackage.org/lts/package/life-sync)
 [![Stackage Nightly](http://stackage.org/package/life-sync/badge/nightly)](http://stackage.org/nightly/package/life-sync)
 
-`life-sync` is CLI tool that makes it easier to synchronize `dotfiles`
+`life-sync` is a CLI tool that makes it easier to synchronize `dotfiles`
 repository with personal configs across multiple machines.
 
 ## Motivation
@@ -19,7 +19,7 @@ For example:
 3. Git configuration.
 
 And much more! But sometimes you start working from a new fresh machine without
-your settings, like in these situations:
+havig your settings within touch, like in these situations:
 
 1. You bought a new PC or laptop.
 2. You might reinstall your system on your working machine.
@@ -55,6 +55,9 @@ $ source <(life --bash-completion-script `which life`)
 
 ## Usage
 
+> **NOTE:** make sure you configured SSH for your Github. `life-sync` assumes
+> that you have SSH configured.
+
 After installing `life-sync` you need to call command `life` with specified options:
 
 ```
@@ -74,12 +77,25 @@ Available commands:
                            the latest version.
   pull                     Updates local state of '.life' and 'dotfiles' from
                            GitHub repository.
+
+`life init` usage: life init OWNER
+  OWNER                    Your github user name
+
+`life add` usage: life add ((-f|--file FILE_PATH) | (-d|--dir DIRECTORY_PATH))
+
+`life remove` usage: life remove ((-f|--file FILE_PATH) | (-d|--dir DIRECTORY_PATH))
+
+`life push` usage: life push
+
+`life pull` usage: life pull OWNER [-f|--no-file FILE_PATH] [-d|--no-dir FILE_PATH]
+  OWNER                    Your github user name
+  -f,--no-file FILE_PATH   Excluding these specific files from copying
+  -d,--no-dir FILE_PATH    Excluding these specific directories from copying
+
 ```
 
-> **NOTE:** make sure you configured SSH for your Github.
-
-If some command takes a path to a file or a directory as an argument, the path
-should be specifed relative to the home directory.
+> **NOTE:** If some command takes a path to a file or a directory as an
+> argument, the path should be specifed relative to the home directory.
 
 `life-sync` keeps the structure of your `dotfiles` repository in its own file
 called `.life` which is stored in `dotfiles` repository as well.
