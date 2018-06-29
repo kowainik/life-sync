@@ -33,6 +33,12 @@ command, your can copy every file and directory from `dotfiles` repository to
 your machine. Or update your remote `dotfiles` repository after multiple local
 changes to different files.
 
+## Prerequisites
+
+* [`git`](https://git-scm.com)
+* [`hub`](https://github.com/github/hub)
+* Configured SSH for Github
+
 ## Installation
 
 Installation process can be done with one simple command:
@@ -54,9 +60,6 @@ $ source <(life --bash-completion-script `which life`)
 ```
 
 ## Usage
-
-> **NOTE:** make sure you configured SSH for your Github. `life-sync` assumes
-> that you have SSH configured.
 
 After installing `life-sync` you need to call command `life` with specified options:
 
