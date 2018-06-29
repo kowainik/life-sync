@@ -76,6 +76,8 @@ Available commands:
                            GitHub repository.
 ```
 
+> **NOTE:** make sure you configured SSH for your Github.
+
 If some command takes a path to a file or a directory as an argument, the path
 should be specifed relative to the home directory.
 
