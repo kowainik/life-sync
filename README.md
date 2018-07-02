@@ -6,8 +6,8 @@
 [![Stackage LTS](http://stackage.org/package/life-sync/badge/lts)](http://stackage.org/lts/package/life-sync)
 [![Stackage Nightly](http://stackage.org/package/life-sync/badge/nightly)](http://stackage.org/nightly/package/life-sync)
 
-`life-sync` is a CLI tool that makes it easier to synchronize `dotfiles`
-repository with personal configs across multiple machines.
+`life-sync` is a CLI tool that makes it easier to synchronize a repository of 
+personal config files across multiple machines.
 
 ## Motivation
 
@@ -18,18 +18,18 @@ For example:
 2. Useful bash aliases and other miscellaneous shell settings.
 3. Git configuration.
 
-And much more! But sometimes you start working from a new fresh machine without
-having your settings within touch, like in these situations:
+And much more! But sometimes you start working from a fresh machine without
+having your settings within reach, as in these situations:
 
 1. You bought a new PC or laptop.
-2. You might reinstall your system on your working machine.
+2. You reinstalled the operating system on your machine.
 3. You were given a new laptop at work.
 
 Every time this happens, you need to walk through the tedious process of copying
 your data again. It's a well-known practice to
-[store configs in `dotfiles` GitHub repository](https://dotfiles.github.io/).
+[store configs in a `dotfiles` GitHub repository](https://dotfiles.github.io/).
 And `life-sync` makes it much easier to maintain this repository! With a single
-command, your can copy every file and directory from `dotfiles` repository to
+command, your can copy every file and directory from your `dotfiles` repository to
 your machine. Or update your remote `dotfiles` repository after multiple local
 changes to different files.
 
@@ -37,11 +37,11 @@ changes to different files.
 
 * [`git`](https://git-scm.com)
 * [`hub`](https://github.com/github/hub)
-* Configured SSH for Github
+* SSH access to Github configured
 
 ## Installation
 
-Installation process can be done with one simple command:
+Install with one simple command:
 
 ```shell
 $ cabal install life-sync
@@ -53,7 +53,7 @@ or
 $ stack install life-sync-1.0
 ```
 
-You can turn on the bash auto-completion by running the following command:
+You can turn on bash auto-completion by running the following command:
 
 ```
 $ source <(life --bash-completion-script `which life`)
@@ -61,7 +61,7 @@ $ source <(life --bash-completion-script `which life`)
 
 ## Usage
 
-After installing `life-sync` you need to call command `life` with specified options:
+After installing `life-sync` you need to call the command `life` with specified options:
 
 ```
 $ life --help
@@ -101,25 +101,25 @@ Available commands:
 
 ```
 
-> **NOTE:** If some command takes a path to a file or a directory as an
+> **NOTE:** If a command takes a path to a file or a directory as an
 > argument, the path should be specifed relative to the home directory.
 
 `life-sync` keeps the structure of your `dotfiles` repository in its own file
-called `.life` which is stored in `dotfiles` repository as well.
+called `.life` which is also stored in your `dotfiles` repository.
 
-You can see an example of `dotfiles` repository maintained by `life-sync` here:
+You can see an example of a `dotfiles` repository maintained by `life-sync` here:
 
 * [ChShersh/dotfiles](https://github.com/ChShersh/dotfiles)
 
 ## Examples
 
-### Create `dotfiles` repository for the first time
+### Create a `dotfiles` repository for the first time
 
 ```
 $ life init MyGithubName
 ```
 
-### Track new file or directory
+### Track a new file or directory
 
 To track a file:
 
@@ -133,15 +133,15 @@ To track a directory:
 $ life add -d path/to/dir/relative/from/home
 ```
 
-To stop tracking some file, use `life remove` command instead.
+To stop tracking some file, use `life remove` instead.
 
-### Push all changes to remote repository
+### Push all changes to the remote repository
 
 ```
 $ life push
 ```
 
-### Pull all changes from remote repository
+### Pull all changes from the remote repository
 
 To pull every file and directory:
 
