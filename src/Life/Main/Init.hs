@@ -89,7 +89,7 @@ scanConfig LifeConfiguration{..} = do
          )
 
 partitionM :: forall f m a . (Monad m, Foldable f) => (a -> m Bool) -> f a -> m ([a], [a])
-partitionM check = foldM partitionAction ([], [])
+partitionM check = foldlM partitionAction ([], [])
   where
     partitionAction :: ([a], [a]) -> a -> m ([a], [a])
     partitionAction (ifTrue, ifFalse) a = check a >>= \case

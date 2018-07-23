@@ -6,6 +6,7 @@ module Life.Main.Remove
        ( lifeRemove
        ) where
 
+import Lens.Micro.Platform (Lens', (%~))
 import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
 

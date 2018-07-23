@@ -33,17 +33,18 @@ module Life.Configuration
        , writeGlobalLife
        ) where
 
+import Control.Monad.Catch (MonadThrow (..))
 import Fmt (indentF, unlinesF, (+|), (|+))
-import Lens.Micro.Platform (makeFields)
+import Lens.Micro.Platform (makeFields, (.~), (^.))
 import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))
-import Toml (BiToml, Valuer (..), (.=))
+import Toml (AnyValue (..), BiToml, Prism (..), (.=))
 
 import Life.Shell (lifePath, relativeToHome, repoName)
 
 import qualified Data.Set as Set
+import qualified Data.Text as T
 import qualified Text.Show as Show
 import qualified Toml
-
 
 -- | Data type to represent either file or directory.
 data LifePath = File FilePath | Dir FilePath
@@ -102,11 +103,14 @@ data CorpseConfiguration = CorpseConfiguration
 
 corpseConfiguationT :: BiToml CorpseConfiguration
 corpseConfiguationT = CorpseConfiguration
-    <$> Toml.arrayOf stringV "files"       .= corpseFiles
-    <*> Toml.arrayOf stringV "directories" .= corpseDirectories
+    <$> Toml.arrayOf _String "files"       .= corpseFiles
+    <*> Toml.arrayOf _String "directories" .= corpseDirectories
   where
-    stringV :: Valuer 'Toml.TString String
-    stringV = Valuer (Toml.matchText >=> pure . toString) (Toml.String . toText)
+    _String :: Prism AnyValue String
+    _String = Prism
+        { preview = \(AnyValue t) -> Toml.matchText t >>= pure . toString
+        , review = AnyValue . Toml.Text . toText
+        }
 
 resurrect :: MonadThrow m => CorpseConfiguration -> m LifeConfiguration
 resurrect CorpseConfiguration{..} = do
@@ -131,7 +135,7 @@ renderLifeConfiguration printIfEmpty LifeConfiguration{..} = mconcat $
     render :: Text -> Set (Path b t) -> Maybe Text
     render key paths = do
         let prefix = key <> " = "
-        let array  = renderStringArray (length prefix) (map show $ toList paths)
+        let array  = renderStringArray (T.length prefix) (map show $ toList paths)
 
         if not printIfEmpty && null paths
         then Nothing

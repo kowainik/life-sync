@@ -1,5 +1,5 @@
 name:                life-sync
-version:             1.0
+version:             1.0.1
 description:         Synchronize personal configs across multiple machines
 homepage:            https://github.com/kowainik/life-sync
 bug-reports:         https://github.com/kowainik/life-sync/issues
@@ -40,14 +40,15 @@ library
                      , ansi-terminal
                      , bytestring
                      , containers
+                     , exceptions
                      , fmt
                      , microlens-platform
                      , path
                      , path-io
                      , process
+                     , relude >= 0.1.0
                      , text >= 1.2
-                     , tomland >= 0.2.1
-                     , universum >= 1.2.0
+                     , tomland ^>= 0.3
 
   ghc-options:         -Wall
   default-language:    Haskell2010
