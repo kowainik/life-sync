@@ -1,7 +1,7 @@
--- | Uses @universum@ as default prelude.
+-- | Uses @relude@ as default prelude.
 
 module Prelude
-       ( module Universum
+       ( module Relude
        ) where
 
-import Universum
+import Relude

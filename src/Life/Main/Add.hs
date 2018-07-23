@@ -6,6 +6,7 @@ module Life.Main.Add
        ( lifeAdd
        ) where
 
+import Lens.Micro.Platform (Lens', (%~))
 import Path (Abs, Dir, File, Path, Rel, parent, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, getHomeDir,
                 makeRelative, resolveDir, resolveFile)

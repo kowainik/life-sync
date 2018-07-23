@@ -21,7 +21,7 @@ module Life.Github
        , updateFromRepo
        ) where
 
-import Control.Exception (throwIO)
+import Control.Exception (catch, throwIO)
 import Path (Abs, Dir, File, Path, Rel, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 import System.IO.Error (IOError, isDoesNotExistError)
@@ -67,7 +67,7 @@ createRepository (Owner owner) (Repo repo) = do
 ----------------------------------------------------------------------------
 
 -- | Executes action with 'repoName' set as pwd.
-insideRepo :: (MonadIO m, MonadMask m) => m a -> m a
+insideRepo :: IO a -> IO a
 insideRepo action = do
     repoPath <- relativeToHome repoName
     withCurrentDir repoPath action

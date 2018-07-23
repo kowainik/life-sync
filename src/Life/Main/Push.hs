@@ -6,6 +6,7 @@ module Life.Main.Push
        ( lifePush
        ) where
 
+import Lens.Micro.Platform ((^.))
 import Path (Abs, Path, Rel, toFilePath, (</>))
 import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
 

@@ -1,5 +1,6 @@
 module Test.Roundtrip where
 
+import Data.Foldable (foldr1)
 import Hedgehog (Gen, Property, forAll, property, tripping)
 import Path.Internal (Path (Path))
 import System.FilePath (pathSeparator, (</>))

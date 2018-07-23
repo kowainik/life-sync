@@ -23,7 +23,7 @@ import System.Console.ANSI (Color (..), ColorIntensity (Vivid), ConsoleIntensity
 import System.IO (hFlush)
 
 import qualified Data.Text as T
-import qualified Universum.Unsafe as Unsafe
+import qualified Relude.Unsafe as Unsafe
 
 ----------------------------------------------------------------------------
 -- Ansi-terminal
@@ -65,7 +65,7 @@ prompt = do
 promptNonEmpty :: IO Text
 promptNonEmpty = do
     res <- T.strip <$> prompt
-    if null res
+    if T.null res
         then warningMessage "The answer shouldn't be empty" >> promptNonEmpty
         else pure res
 
