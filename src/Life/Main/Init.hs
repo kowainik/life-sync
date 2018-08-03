@@ -10,10 +10,10 @@ module Life.Main.Init
 import Path (mkRelFile)
 import Path.IO (doesDirExist, doesFileExist)
 
+import Life.Core (CopyDirection (..), Owner (..), Repo (Repo))
 import Life.Configuration (LifeConfiguration (..), parseHomeLife, renderLifeConfiguration,
                            singleFileConfig, writeGlobalLife)
-import Life.Github (CopyDirection (..), Owner (..), Repo (Repo), copyLife, createRepository,
-                    insideRepo)
+import Life.Github (copyLife, createRepository, insideRepo, master)
 import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
                      successMessage, warningMessage)
 import Life.Shell (LifeExistence (..), createDirInHome, lifePath, relativeToHome, repoName,
@@ -33,6 +33,7 @@ predefinedLifeConfig = mempty
           , $(mkRelFile ".ghc/ghci.conf")
           , $(mkRelFile ".stylish-haskell.yaml")
           ]
+    , lifeConfigurationBranch = Last (Just master)
     }
 
 lifeInit :: Owner -> IO ()
@@ -84,8 +85,8 @@ scanConfig :: LifeConfiguration -> IO (LifeConfiguration, LifeConfiguration)
 scanConfig LifeConfiguration{..} = do
     (existingFiles, nonExistingFiles) <- partitionM (relativeToHome >=> doesFileExist) lifeConfigurationFiles
     (existingDirs, nonExistingDirs) <- partitionM (relativeToHome >=> doesDirExist) lifeConfigurationDirectories
-    pure ( LifeConfiguration (Set.fromList existingFiles) (Set.fromList existingDirs)
-         , LifeConfiguration (Set.fromList nonExistingFiles) (Set.fromList nonExistingDirs)
+    pure ( LifeConfiguration (Set.fromList existingFiles) (Set.fromList existingDirs) lifeConfigurationBranch
+         , LifeConfiguration (Set.fromList nonExistingFiles) (Set.fromList nonExistingDirs) lifeConfigurationBranch
          )
 
 partitionM :: forall f m a . (Monad m, Foldable f) => (a -> m Bool) -> f a -> m ([a], [a])

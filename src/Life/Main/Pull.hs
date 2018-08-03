@@ -6,18 +6,21 @@ module Life.Main.Pull
 
 import Path (Dir, File, Path, Rel)
 
-import Life.Configuration (LifeConfiguration (..))
-import Life.Github (Owner, cloneRepo, pullUpdateFromRepo, updateFromRepo)
+import Life.Configuration (LifeConfiguration (..), getBranch, parseHomeLife)
+import Life.Github (Owner, cloneRepo, pullUpdateFromRepo, master, updateFromRepo, setCurrentBranch)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, choose, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
 
 lifePull :: Owner -> Set (Path Rel File) -> Set (Path Rel Dir) -> IO ()
-lifePull owner withoutFiles withoutDirs = whatIsLife >>= \case
-    OnlyRepo _ -> warningMessage ".life file not found" >> pullUpdate
-    OnlyLife _ -> warningMessage "dotfiles not found" >> clone >> update
-    NoLife     -> initOrPull
-    Both _ _   -> pullUpdate
+lifePull owner withoutFiles withoutDirs = do
+    homeLife <- parseHomeLife
+    let branch = getBranch homeLife
+    whatIsLife >>= \case
+            OnlyRepo _ -> warningMessage ".life file not found" >> setCurrentBranch branch >> pullUpdate
+            OnlyLife _ -> warningMessage "dotfiles not found" >> clone >> setCurrentBranch branch >> update
+            NoLife     -> initOrPull >> setCurrentBranch branch
+            Both _ _   -> setCurrentBranch branch >> pullUpdate
   where
     initOrPull :: IO ()
     initOrPull = do
@@ -31,9 +34,9 @@ lifePull owner withoutFiles withoutDirs = whatIsLife >>= \case
             _   -> error "Impossible choice"
 
     life :: LifeConfiguration
-    life = LifeConfiguration withoutFiles withoutDirs
+    life = LifeConfiguration withoutFiles withoutDirs (Last $ Just master)
 
     clone, update, pullUpdate :: IO ()
     clone = cloneRepo owner
-    update = updateFromRepo life
+    update     = updateFromRepo life
     pullUpdate = pullUpdateFromRepo life

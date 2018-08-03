@@ -1,5 +1,5 @@
 name:                life-sync
-version:             1.0.1
+version:             1.1.0
 description:         Synchronize personal configs across multiple machines
 homepage:            https://github.com/kowainik/life-sync
 bug-reports:         https://github.com/kowainik/life-sync/issues
@@ -25,6 +25,7 @@ library
   hs-source-dirs:      src
 
   exposed-modules:     Prelude
+                       Life.Core
                        Life.Configuration
                        Life.Github
                        Life.Message
@@ -34,6 +35,7 @@ library
                        Life.Main.Pull
                        Life.Main.Push
                        Life.Main.Remove
+                       Life.Main.Switch
                        Life.Validation
 
   build-depends:       base-noprelude >= 4.9 && < 5

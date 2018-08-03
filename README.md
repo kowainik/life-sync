@@ -1,3 +1,4 @@
+
 # life-sync
 
 [![Hackage](https://img.shields.io/hackage/v/life-sync.svg)](https://hackage.haskell.org/package/life-sync)
@@ -80,7 +81,8 @@ Available commands:
                            the latest version.
   pull                     Updates local state of '.life' and 'dotfiles' from
                            GitHub repository.
-
+  switch                   Switch branch in '.life' config and 'dotfiles'.
+  
 `life init` usage: life init OWNER
   OWNER                    Your github user name
 
@@ -99,6 +101,9 @@ Available commands:
   -f,--no-file FILE_PATH   Excluding these specific files from copying
   -d,--no-dir FILE_PATH    Excluding these specific directories from copying
 
+`life switch` usage: life switch BRANCH
+  -h,--help                Show this help text
+  BRANCH                   Git branch name
 ```
 
 > **NOTE:** If a command takes a path to a file or a directory as an
@@ -153,4 +158,20 @@ To pull everything except some files or some directories:
 
 ```
 $ life pull ChShersh --no-file some/file --no-dir some/dir
+```
+
+### Branches management
+
+To select current branch just run `life switch` command. If specified branch not exists, `life-sync` will create it.
+
+```
+$ life switch example-branch
+⚙  git fetch origin
+⚙  git checkout -b example-branch
+Switched to a new branch 'example-branch'
+⚙  git push --set-upstream origin example-branch
+Total 0 (delta 0), reused 0 (delta 0)
+To github.com:nixorn/dotfiles.git
+ * [new branch]      example-branch -> example-branch
+Branch example-branch set up to track remote branch example-branch from origin.
 ```

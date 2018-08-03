@@ -11,9 +11,10 @@ import Path (Abs, Dir, File, Path, Rel, parent, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, getHomeDir,
                 makeRelative, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseHomeLife,
-                           writeGlobalLife)
-import Life.Github (addToRepo, withSynced)
+import Life.Core (LifePath (..))
+import Life.Configuration (LifeConfiguration, directories, files,
+                           getBranch, getBranchName, parseHomeLife, writeGlobalLife)
+import Life.Github (addToRepo, withSynced, insideRepo)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, errorMessage, infoMessage, warningMessage)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
@@ -25,12 +26,13 @@ import qualified Data.Set as Set
 lifeAdd :: LifePath -> IO ()
 lifeAdd lPath = whatIsLife >>= \case
     -- actual life add process
-    Both _ _ -> withSynced addingProcess
-
-    -- if one of them is missing -- abort
+    Both _ _ -> do
+        life <- parseHomeLife
+        insideRepo $ "git" ["checkout", getBranchName life]
+        withSynced (getBranch life) addingProcess
+        -- if one of them is missing -- abort
     OnlyRepo _ -> abortCmd "add" ".life file doesn't exist"
     OnlyLife _ -> abortCmd "add" "dotfiles/ directory doesn't exist"
-
     -- if both .life and dotfiles doesn't exist go to init process
     NoLife -> lifeInitQuestion "add" addingProcess
   where
@@ -89,7 +91,7 @@ checkEqualFiles path = do
 checkEqualDirs :: Path Rel Dir -> IO Bool
 checkEqualDirs _ = do
     warningMessage "TODO: check directories to be equal"
-    pure True
+    pure False
 
 -- | Just like 'copyFile' but also creates directory for second file.
 copyFileWithDir :: Path Abs File -> Path Abs File -> IO ()

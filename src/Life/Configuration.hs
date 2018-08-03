@@ -8,18 +8,19 @@
 -- | Contains configuration data type.
 
 module Life.Configuration
-       ( LifePath (..)
+       ( LifeConfiguration  (..)
 
-       , LifeConfiguration  (..)
+       , getBranch
+       , getBranchName
        , singleDirConfig
        , singleFileConfig
-
        , lifeConfigMinus
 
 --         -- * Parsing exceptions
 --       , ParseLifeException (..)
 
          -- * Lenses for 'LifeConfiguration'
+       , branch
        , files
        , directories
 
@@ -40,15 +41,14 @@ import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFil
 import Toml (AnyValue (..), BiToml, Prism (..), (.=))
 
 import Life.Shell (lifePath, relativeToHome, repoName)
+import Life.Core (Branch (..))
 
 import qualified Data.Set as Set
 import qualified Data.Text as T
+import qualified Relude.Unsafe as Unsafe
 import qualified Text.Show as Show
 import qualified Toml
 
--- | Data type to represent either file or directory.
-data LifePath = File FilePath | Dir FilePath
-    deriving (Show)
 
 ----------------------------------------------------------------------------
 -- Life Configuration data type with lenses
@@ -57,9 +57,16 @@ data LifePath = File FilePath | Dir FilePath
 data LifeConfiguration = LifeConfiguration
      { lifeConfigurationFiles       :: Set (Path Rel File)
      , lifeConfigurationDirectories :: Set (Path Rel Dir)
+     , lifeConfigurationBranch      :: Last Branch
      } deriving (Show, Eq)
 
 makeFields ''LifeConfiguration
+
+getBranch :: LifeConfiguration -> Branch
+getBranch  = Unsafe.fromJust . getLast . lifeConfigurationBranch
+
+getBranchName :: LifeConfiguration -> Text
+getBranchName = unBranch . getBranch
 
 ----------------------------------------------------------------------------
 -- Algebraic instances and utilities
@@ -69,10 +76,11 @@ instance Semigroup LifeConfiguration where
     life1 <> life2 = LifeConfiguration
         { lifeConfigurationFiles       = life1^.files <> life2^.files
         , lifeConfigurationDirectories = life1^.directories <> life2^.directories
+        , lifeConfigurationBranch      = life2^.branch
         }
 
 instance Monoid LifeConfiguration where
-    mempty  = LifeConfiguration mempty mempty
+    mempty  = LifeConfiguration mempty mempty mempty
     mappend = (<>)
 
 singleFileConfig :: Path Rel File -> LifeConfiguration
@@ -91,6 +99,7 @@ lifeConfigMinus :: LifeConfiguration -- ^ repo .life config
 lifeConfigMinus dotfiles global = LifeConfiguration
     (Set.difference (dotfiles ^. files) (global ^. files))
     (Set.difference (dotfiles ^. directories) (global ^. directories))
+    (lifeConfigurationBranch dotfiles)
 
 ----------------------------------------------------------------------------
 -- Toml parser for life configuration
@@ -99,16 +108,18 @@ lifeConfigMinus dotfiles global = LifeConfiguration
 data CorpseConfiguration = CorpseConfiguration
     { corpseFiles       :: [FilePath]
     , corpseDirectories :: [FilePath]
+    , corpseBranch      :: Text
     }
 
 corpseConfiguationT :: BiToml CorpseConfiguration
 corpseConfiguationT = CorpseConfiguration
     <$> Toml.arrayOf _String "files"       .= corpseFiles
     <*> Toml.arrayOf _String "directories" .= corpseDirectories
+    <*> Toml.text            "branch"      .= corpseBranch
   where
     _String :: Prism AnyValue String
     _String = Prism
-        { preview = \(AnyValue t) -> Toml.matchText t >>= pure . toString
+        { preview = \(AnyValue t) -> toString <$> Toml.matchText t
         , review = AnyValue . Toml.Text . toText
         }
 
@@ -120,6 +131,7 @@ resurrect CorpseConfiguration{..} = do
     pure $ LifeConfiguration
         { lifeConfigurationFiles = Set.fromList filePaths
         , lifeConfigurationDirectories = Set.fromList dirPaths
+        , lifeConfigurationBranch = Last $ Just $ Branch corpseBranch
         }
 
 -- TODO: should tomland one day support this?...
@@ -127,10 +139,10 @@ resurrect CorpseConfiguration{..} = do
 renderLifeConfiguration :: Bool  -- ^ True to see empty entries in output
                         -> LifeConfiguration
                         -> Text
-renderLifeConfiguration printIfEmpty LifeConfiguration{..} = mconcat $
-       maybeToList (render "directories" lifeConfigurationDirectories)
-    ++ [ "\n" ]
-    ++ maybeToList (render "files" lifeConfigurationFiles)
+renderLifeConfiguration printIfEmpty life@LifeConfiguration{..} = T.intercalate "\n"
+       [ "branch = \"" <> getBranchName life <> "\""
+       , mconcat $ maybeToList (render "directories" lifeConfigurationDirectories)
+       , mconcat $ maybeToList (render "files" lifeConfigurationFiles)]
   where
     render :: Text -> Set (Path b t) -> Maybe Text
     render key paths = do

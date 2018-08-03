@@ -13,8 +13,7 @@ module Options
 import Options.Applicative (Parser, ParserInfo, command, execParser, fullDesc, help, helper, info,
                             long, metavar, progDesc, short, strArgument, strOption, subparser)
 
-import Life.Configuration (LifePath (..))
-import Life.Github (Owner (..))
+import Life.Core (LifePath (..), Owner (..), Branch (..))
 
 -- | Commands to execute
 data LifeCommand
@@ -23,6 +22,7 @@ data LifeCommand
     | Remove PathOptions
     | Push
     | Pull   PullOptions
+    | Switch Branch
     deriving (Show)
 
 ---------------------------------------------------------------------------
@@ -46,6 +46,9 @@ commandParser = subparser $
  <> command "pull"
             (info (helper <*> fmap Pull pullOptionsParser)
                   (fullDesc <> progDesc "Updates local state of '.life' and 'dotfiles' from GitHub repository."))
+ <> command "switch"
+            (info (helper <*> fmap Switch branchParser)
+                  (fullDesc <> progDesc "Switch branch in '.life' config and 'dotfiles'."))
 
 
 optionsInfo :: ParserInfo LifeCommand
@@ -61,6 +64,13 @@ ownerParser = fmap Owner
      $ strArgument
      $ metavar "OWNER"
     <> help "Your github user name"
+
+branchParser :: Parser Branch
+branchParser = fmap Branch
+     $ strArgument
+     $ metavar "BRANCH"
+    <> help "Git branch name"
+
 
 ----------------------------------------------------------------------------
 -- life pull

@@ -7,6 +7,7 @@ import Life.Main.Init (lifeInit)
 import Life.Main.Pull (lifePull)
 import Life.Main.Push (lifePush)
 import Life.Main.Remove (lifeRemove)
+import Life.Main.Switch (lifeSwitch)
 
 import Options (LifeCommand (..), PathOptions (..), PullOptions (..), parseCommand)
 
@@ -22,3 +23,4 @@ main = parseCommand >>= \case
         withoutFiles <- Set.fromList <$> mapM parseRelFile pullOptionsNoFiles
         withoutDirs  <- Set.fromList <$> mapM parseRelDir  pullOptionsNoDirs
         lifePull pullOptionsOwner withoutFiles withoutDirs
+    Switch branch          -> lifeSwitch branch
