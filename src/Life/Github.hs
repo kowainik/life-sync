@@ -1,8 +1,8 @@
 -- | Utilities to work with GitHub repositories using "hub".
 
 module Life.Github
-       ( Owner (..)
-       , Repo  (..)
+       ( Owner  (..)
+       , Repo   (..)
 
          -- * Repository utils
        , checkRemoteSync
@@ -30,8 +30,6 @@ import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLif
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
-import qualified Data.Text as T
-
 newtype Owner  = Owner  { getOwner  :: Text } deriving (Show)
 newtype Repo   = Repo   { getRepo   :: Text } deriving (Show)
 newtype Branch = Branch { getBranch :: Text } deriving (Show)
@@ -40,20 +38,14 @@ newtype Branch = Branch { getBranch :: Text } deriving (Show)
 -- VSC commands
 ----------------------------------------------------------------------------
 
-getCurrentBranch :: IO Text
-getCurrentBranch = do
-  branch <- "git" $| ["rev-parse", "--abbrev-ref", "HEAD"]
-  return $ T.pack $ filter (/= '\n') branch
-
 askToPushka :: Text -> IO ()
 askToPushka commitMsg = do
     "git" ["add", "."]
     infoMessage "The following changes are going to be pushed:"
     "git" ["diff", "--name-status", "HEAD"]
-    branch <- getCurrentBranch
     continue <- chooseYesNo "Would you like to proceed?"
     if continue
-    then pushka (Branch branch) commitMsg
+    then pushka (Branch "master") commitMsg
     else errorMessage "Abort pushing" >> exitFailure
 
 -- | Make a commit and push it.
@@ -103,9 +95,10 @@ checkRemoteSync (Branch br) = do
 
 withSynced :: IO a -> IO a
 withSynced action = insideRepo $ do
+    let branchname = "master"
+        branch = Branch branchname
     infoMessage "Checking if repo is synchnorized..."
-    branch <- getCurrentBranch
-    isSynced <- checkRemoteSync (Branch branch)
+    isSynced <- checkRemoteSync branch
     if isSynced then do
         infoMessage "Repo is up-to-date"
         action
@@ -113,7 +106,7 @@ withSynced action = insideRepo $ do
         warningMessage "Local version of repository is out of date"
         shouldSync <- chooseYesNo "Do you want to sync repo with remote?"
         if shouldSync then do
-            "git" ["rebase", "origin/" <> branch]
+            "git" ["rebase", "origin/" <> branchname]
             action
         else do
             errorMessage "Aborting current command because repository is not synchronized with remote"
