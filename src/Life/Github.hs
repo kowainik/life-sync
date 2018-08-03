@@ -30,29 +30,38 @@ import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLif
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
-newtype Owner = Owner { getOwner :: Text } deriving (Show)
-newtype Repo  = Repo  { getRepo  :: Text } deriving (Show)
+import qualified Data.Text as T
+
+newtype Owner  = Owner  { getOwner  :: Text } deriving (Show)
+newtype Repo   = Repo   { getRepo   :: Text } deriving (Show)
+newtype Branch = Branch { getBranch :: Text } deriving (Show)
 
 ----------------------------------------------------------------------------
 -- VSC commands
 ----------------------------------------------------------------------------
+
+getCurrentBranch :: IO Text
+getCurrentBranch = do
+  branch <- "git" $| ["rev-parse", "--abbrev-ref", "HEAD"]
+  return $ T.pack $ filter (/= '\n') branch
 
 askToPushka :: Text -> IO ()
 askToPushka commitMsg = do
     "git" ["add", "."]
     infoMessage "The following changes are going to be pushed:"
     "git" ["diff", "--name-status", "HEAD"]
+    branch <- getCurrentBranch
     continue <- chooseYesNo "Would you like to proceed?"
     if continue
-    then pushka commitMsg
+    then pushka (Branch branch) commitMsg
     else errorMessage "Abort pushing" >> exitFailure
 
 -- | Make a commit and push it.
-pushka :: Text -> IO ()
-pushka commitMsg = do
+pushka :: Branch -> Text -> IO ()
+pushka (Branch br) commitMsg = do
     "git" ["add", "."]
     "git" ["commit", "-m", commitMsg]
-    "git" ["push", "-u", "origin", "master"]
+    "git" ["push", "-u", "origin", br]
 
 -- | Creates repository on GitHub inside given folder.
 createRepository :: Owner -> Repo -> IO ()
@@ -60,7 +69,7 @@ createRepository (Owner owner) (Repo repo) = do
     let description = ":computer: Configuration files"
     "git" ["init"]
     "hub" ["create", "-d", description, owner <> "/" <> repo]
-    pushka "Create the project"
+    pushka (Branch "master") "Create the project"
 
 ----------------------------------------------------------------------------
 -- dotfiles workflow
@@ -85,17 +94,18 @@ cloneRepo (Owner owner) = do
         "git" ["clone", "git@github.com:" <> owner <> "/dotfiles.git"]
 
 -- | Returns true if local @dotfiles@ repository is synchronized with remote repo.
-checkRemoteSync :: IO Bool
-checkRemoteSync = do
-    "git" ["fetch", "origin", "master"]
-    localHash  <- "git" $| ["rev-parse", "master"]
-    remoteHash <- "git" $| ["rev-parse", "origin/master"]
+checkRemoteSync :: Branch -> IO Bool
+checkRemoteSync (Branch br) = do
+    "git" ["fetch", "origin", br]
+    localHash  <- "git" $| ["rev-parse", br]
+    remoteHash <- "git" $| ["rev-parse", "origin/" <> br]
     pure $ localHash == remoteHash
 
 withSynced :: IO a -> IO a
 withSynced action = insideRepo $ do
     infoMessage "Checking if repo is synchnorized..."
-    isSynced <- checkRemoteSync
+    branch <- getCurrentBranch
+    isSynced <- checkRemoteSync (Branch branch)
     if isSynced then do
         infoMessage "Repo is up-to-date"
         action
@@ -103,7 +113,7 @@ withSynced action = insideRepo $ do
         warningMessage "Local version of repository is out of date"
         shouldSync <- chooseYesNo "Do you want to sync repo with remote?"
         if shouldSync then do
-            "git" ["rebase", "origin/master"]
+            "git" ["rebase", "origin/" <> branch]
             action
         else do
             errorMessage "Aborting current command because repository is not synchronized with remote"
