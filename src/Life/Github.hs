@@ -1,8 +1,9 @@
 -- | Utilities to work with GitHub repositories using "hub".
 
 module Life.Github
-       ( Owner (..)
-       , Repo  (..)
+       ( Owner  (..)
+       , Repo   (..)
+       , Branch (..)
 
          -- * Repository utils
        , checkRemoteSync
@@ -30,9 +31,9 @@ import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLif
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
-newtype Owner  = Owner  { getOwner  :: Text } deriving (Show)
-newtype Repo   = Repo   { getRepo   :: Text } deriving (Show)
-newtype Branch = Branch { getBranch :: Text } deriving (Show)
+newtype Owner  = Owner  { unOwner  :: Text } deriving (Show)
+newtype Repo   = Repo   { unRepo   :: Text } deriving (Show)
+newtype Branch = Branch { unBranch :: Text } deriving (Show)
 
 ----------------------------------------------------------------------------
 -- VSC commands
@@ -50,10 +51,10 @@ askToPushka commitMsg = do
 
 -- | Make a commit and push it.
 pushka :: Branch -> Text -> IO ()
-pushka (Branch br) commitMsg = do
+pushka (Branch branch) commitMsg = do
     "git" ["add", "."]
     "git" ["commit", "-m", commitMsg]
-    "git" ["push", "-u", "origin", br]
+    "git" ["push", "-u", "origin", branch]
 
 -- | Creates repository on GitHub inside given folder.
 createRepository :: Owner -> Repo -> IO ()
@@ -87,16 +88,14 @@ cloneRepo (Owner owner) = do
 
 -- | Returns true if local @dotfiles@ repository is synchronized with remote repo.
 checkRemoteSync :: Branch -> IO Bool
-checkRemoteSync (Branch br) = do
-    "git" ["fetch", "origin", br]
-    localHash  <- "git" $| ["rev-parse", br]
-    remoteHash <- "git" $| ["rev-parse", "origin/" <> br]
+checkRemoteSync (Branch branch) = do
+    "git" ["fetch", "origin", branch]
+    localHash  <- "git" $| ["rev-parse", branch]
+    remoteHash <- "git" $| ["rev-parse", "origin/" <> branch]
     pure $ localHash == remoteHash
 
-withSynced :: IO a -> IO a
-withSynced action = insideRepo $ do
-    let branchname = "master"
-        branch = Branch branchname
+withSynced :: Branch -> IO a -> IO a
+withSynced branch@(Branch branchname) action = insideRepo $ do
     infoMessage "Checking if repo is synchnorized..."
     isSynced <- checkRemoteSync branch
     if isSynced then do
