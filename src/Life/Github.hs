@@ -20,6 +20,9 @@ module Life.Github
        , removeFromRepo
        , updateDotfilesRepo
        , updateFromRepo
+
+         -- * Constants
+       , master
        ) where
 
 import Control.Exception (catch, throwIO)
@@ -46,7 +49,7 @@ askToPushka commitMsg = do
     "git" ["diff", "--name-status", "HEAD"]
     continue <- chooseYesNo "Would you like to proceed?"
     if continue
-    then pushka (Branch "master") commitMsg
+    then pushka master commitMsg
     else errorMessage "Abort pushing" >> exitFailure
 
 -- | Make a commit and push it.
@@ -62,7 +65,7 @@ createRepository (Owner owner) (Repo repo) = do
     let description = ":computer: Configuration files"
     "git" ["init"]
     "hub" ["create", "-d", description, owner <> "/" <> repo]
-    pushka (Branch "master") "Create the project"
+    pushka master "Create the project"
 
 ----------------------------------------------------------------------------
 -- dotfiles workflow
@@ -204,3 +207,7 @@ removeFromRepo removeFun path = do
     handleNotExist e = if isDoesNotExistError e
         then errorMessage ("File/directory " <> pathTextName <> " is not found") >> exitFailure
         else throwIO e
+
+-- | Git "master" branch constant.
+master :: Branch
+master = Branch "master"

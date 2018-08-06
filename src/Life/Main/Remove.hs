@@ -12,7 +12,7 @@ import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir
 
 import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseHomeLife,
                            writeGlobalLife)
-import Life.Github (Branch(..), removeFromRepo, withSynced)
+import Life.Github (master, removeFromRepo, withSynced)
 import Life.Message (abortCmd, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
 
@@ -26,7 +26,7 @@ lifeRemove lPath = whatIsLife >>= \case
     OnlyLife _ -> abortCmd "remove" "dotfiles/ directory doesn't exist"
     OnlyRepo _ -> abortCmd "remove" ".life file doesn't exist"
     -- actual life remove process
-    Both _ _ -> withSynced (Branch "master") $ do
+    Both _ _ -> withSynced master $ do
         homeDirPath  <- getHomeDir
         case lPath of
             (File path) -> do
