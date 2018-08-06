@@ -12,7 +12,7 @@ import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
 
 import Life.Configuration (LifeConfiguration (..), directories, files, lifeConfigMinus,
                            parseHomeLife, parseRepoLife)
-import Life.Github (updateDotfilesRepo, withSynced)
+import Life.Github (master, updateDotfilesRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
@@ -26,7 +26,7 @@ lifePush = whatIsLife >>= \case
     OnlyRepo _ -> abortCmd "push" ".life file doesn't exist"
     OnlyLife _ -> abortCmd "push" "dotfiles file doesn't exist"
     NoLife     -> lifeInitQuestion "push" pushProcess
-    Both _ _   -> withSynced pushProcess
+    Both _ _   -> withSynced master pushProcess
   where
     pushProcess :: IO ()
     pushProcess = do

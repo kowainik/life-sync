@@ -1,8 +1,9 @@
 -- | Utilities to work with GitHub repositories using "hub".
 
 module Life.Github
-       ( Owner (..)
-       , Repo  (..)
+       ( Owner  (..)
+       , Repo   (..)
+       , Branch (..)
 
          -- * Repository utils
        , checkRemoteSync
@@ -19,6 +20,9 @@ module Life.Github
        , removeFromRepo
        , updateDotfilesRepo
        , updateFromRepo
+
+         -- * Constants
+       , master
        ) where
 
 import Control.Exception (catch, throwIO)
@@ -30,8 +34,9 @@ import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLif
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
-newtype Owner = Owner { getOwner :: Text } deriving (Show)
-newtype Repo  = Repo  { getRepo  :: Text } deriving (Show)
+newtype Owner  = Owner  { unOwner  :: Text } deriving (Show)
+newtype Repo   = Repo   { unRepo   :: Text } deriving (Show)
+newtype Branch = Branch { unBranch :: Text } deriving (Show)
 
 ----------------------------------------------------------------------------
 -- VSC commands
@@ -44,15 +49,15 @@ askToPushka commitMsg = do
     "git" ["diff", "--name-status", "HEAD"]
     continue <- chooseYesNo "Would you like to proceed?"
     if continue
-    then pushka commitMsg
+    then pushka master commitMsg
     else errorMessage "Abort pushing" >> exitFailure
 
 -- | Make a commit and push it.
-pushka :: Text -> IO ()
-pushka commitMsg = do
+pushka :: Branch -> Text -> IO ()
+pushka (Branch branch) commitMsg = do
     "git" ["add", "."]
     "git" ["commit", "-m", commitMsg]
-    "git" ["push", "-u", "origin", "master"]
+    "git" ["push", "-u", "origin", branch]
 
 -- | Creates repository on GitHub inside given folder.
 createRepository :: Owner -> Repo -> IO ()
@@ -60,7 +65,7 @@ createRepository (Owner owner) (Repo repo) = do
     let description = ":computer: Configuration files"
     "git" ["init"]
     "hub" ["create", "-d", description, owner <> "/" <> repo]
-    pushka "Create the project"
+    pushka master "Create the project"
 
 ----------------------------------------------------------------------------
 -- dotfiles workflow
@@ -85,17 +90,17 @@ cloneRepo (Owner owner) = do
         "git" ["clone", "git@github.com:" <> owner <> "/dotfiles.git"]
 
 -- | Returns true if local @dotfiles@ repository is synchronized with remote repo.
-checkRemoteSync :: IO Bool
-checkRemoteSync = do
-    "git" ["fetch", "origin", "master"]
-    localHash  <- "git" $| ["rev-parse", "master"]
-    remoteHash <- "git" $| ["rev-parse", "origin/master"]
+checkRemoteSync :: Branch -> IO Bool
+checkRemoteSync (Branch branch) = do
+    "git" ["fetch", "origin", branch]
+    localHash  <- "git" $| ["rev-parse", branch]
+    remoteHash <- "git" $| ["rev-parse", "origin/" <> branch]
     pure $ localHash == remoteHash
 
-withSynced :: IO a -> IO a
-withSynced action = insideRepo $ do
+withSynced :: Branch -> IO a -> IO a
+withSynced branch@(Branch branchname) action = insideRepo $ do
     infoMessage "Checking if repo is synchnorized..."
-    isSynced <- checkRemoteSync
+    isSynced <- checkRemoteSync branch
     if isSynced then do
         infoMessage "Repo is up-to-date"
         action
@@ -103,7 +108,7 @@ withSynced action = insideRepo $ do
         warningMessage "Local version of repository is out of date"
         shouldSync <- chooseYesNo "Do you want to sync repo with remote?"
         if shouldSync then do
-            "git" ["rebase", "origin/master"]
+            "git" ["rebase", "origin/" <> branchname]
             action
         else do
             errorMessage "Aborting current command because repository is not synchronized with remote"
@@ -202,3 +207,7 @@ removeFromRepo removeFun path = do
     handleNotExist e = if isDoesNotExistError e
         then errorMessage ("File/directory " <> pathTextName <> " is not found") >> exitFailure
         else throwIO e
+
+-- | Git "master" branch constant.
+master :: Branch
+master = Branch "master"

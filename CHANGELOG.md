@@ -4,6 +4,11 @@ Change log
 life-sync uses [PVP Versioning][1].
 The change log is available [on GitHub][2].
 
+# 1.0.2
+
+* [#42](https://github.com/kowainik/life-sync/issues/42):
+  Create newtype `Branch`.
+
 # 1.0.1
 
 * Switch to `relude`.
