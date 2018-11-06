@@ -89,7 +89,7 @@ checkEqualFiles path = do
 checkEqualDirs :: Path Rel Dir -> IO Bool
 checkEqualDirs _ = do
     warningMessage "TODO: check directories to be equal"
-    pure True
+    pure False
 
 -- | Just like 'copyFile' but also creates directory for second file.
 copyFileWithDir :: Path Abs File -> Path Abs File -> IO ()
