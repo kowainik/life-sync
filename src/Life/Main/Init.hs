@@ -12,8 +12,8 @@ import Path.IO (doesDirExist, doesFileExist)
 
 import Life.Configuration (LifeConfiguration (..), parseHomeLife, renderLifeConfiguration,
                            singleFileConfig, writeGlobalLife)
-import Life.Github (CopyDirection (..), Owner (..), Repo (Repo), copyLife, createRepository,
-                    insideRepo)
+import Life.Core (CopyDirection (..), Owner (..), Repo(..))
+import Life.Github (copyLife, createRepository, insideRepo)
 import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
                      successMessage, warningMessage)
 import Life.Shell (LifeExistence (..), createDirInHome, lifePath, relativeToHome, repoName,

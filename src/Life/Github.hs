@@ -1,18 +1,14 @@
 -- | Utilities to work with GitHub repositories using "hub".
 
 module Life.Github
-       ( Owner  (..)
-       , Repo   (..)
-       , Branch (..)
-
+       (
          -- * Repository utils
-       , checkRemoteSync
+         checkRemoteSync
        , cloneRepo
        , insideRepo
        , withSynced
 
          -- * Repository manipulation commands
-       , CopyDirection (..)
        , copyLife
        , addToRepo
        , createRepository
@@ -31,12 +27,9 @@ import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 import System.IO.Error (IOError, isDoesNotExistError)
 
 import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLife)
+import Life.Core(Branch(..), Repo(..), Owner(..), CopyDirection(..))
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
-
-newtype Owner  = Owner  { unOwner  :: Text } deriving (Show)
-newtype Repo   = Repo   { unRepo   :: Text } deriving (Show)
-newtype Branch = Branch { unBranch :: Text } deriving (Show)
 
 ----------------------------------------------------------------------------
 -- VSC commands
@@ -117,8 +110,6 @@ withSynced branch@(Branch branchname) action = insideRepo $ do
 ----------------------------------------------------------------------------
 -- File manipulation
 ----------------------------------------------------------------------------
-
-data CopyDirection = FromHomeToRepo | FromRepoToHome
 
 pullUpdateFromRepo :: LifeConfiguration -> IO ()
 pullUpdateFromRepo life = do

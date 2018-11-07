@@ -10,8 +10,9 @@ import Lens.Micro.Platform (Lens', (%~))
 import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, LifePath (..), directories, files, parseHomeLife,
+import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife,
                            writeGlobalLife)
+import Life.Core (LifePath (..))
 import Life.Github (master, removeFromRepo, withSynced)
 import Life.Message (abortCmd, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)

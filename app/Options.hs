@@ -13,8 +13,7 @@ module Options
 import Options.Applicative (Parser, ParserInfo, command, execParser, fullDesc, help, helper, info,
                             long, metavar, progDesc, short, strArgument, strOption, subparser)
 
-import Life.Configuration (LifePath (..))
-import Life.Github (Owner (..))
+import Life.Core (LifePath (..), Owner (..))
 
 -- | Commands to execute
 data LifeCommand

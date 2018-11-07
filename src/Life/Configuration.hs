@@ -8,9 +8,7 @@
 -- | Contains configuration data type.
 
 module Life.Configuration
-       ( LifePath (..)
-
-       , LifeConfiguration  (..)
+       ( LifeConfiguration  (..)
        , singleDirConfig
        , singleFileConfig
 
@@ -45,10 +43,6 @@ import qualified Data.Set as Set
 import qualified Data.Text as T
 import qualified Text.Show as Show
 import qualified Toml
-
--- | Data type to represent either file or directory.
-data LifePath = File FilePath | Dir FilePath
-    deriving (Show)
 
 ----------------------------------------------------------------------------
 -- Life Configuration data type with lenses
@@ -108,7 +102,7 @@ corpseConfiguationT = CorpseConfiguration
   where
     _String :: Prism AnyValue String
     _String = Prism
-        { preview = \(AnyValue t) -> Toml.matchText t >>= pure . toString
+        { preview = \(AnyValue t) -> (toString <$> Toml.matchText t)
         , review = AnyValue . Toml.Text . toText
         }
 
