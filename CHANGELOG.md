@@ -8,7 +8,6 @@ The change log is available [on GitHub][2].
 
 * [#44](https://github.com/kowainik/life-sync/issues/44):
   Use `Branch` for manage `~/dotfiles` branches.
-  Fix minor bug with broken `life add -d`.
   Core module with internal types.
   `life switch` branch management subcommand.
 
