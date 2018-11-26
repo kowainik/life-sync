@@ -15,6 +15,7 @@ import Options.Applicative (Parser, ParserInfo, command, execParser, fullDesc, h
 
 import Life.Core (LifePath (..), Owner (..), Branch (..))
 
+
 -- | Commands to execute
 data LifeCommand
     = Init   Owner

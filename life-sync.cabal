@@ -25,8 +25,8 @@ library
   hs-source-dirs:      src
 
   exposed-modules:     Prelude
-                       Life.Core
                        Life.Configuration
+                       Life.Core
                        Life.Github
                        Life.Message
                        Life.Shell

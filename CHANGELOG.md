@@ -8,13 +8,19 @@ The change log is available [on GitHub][2].
 
 * [#44](https://github.com/kowainik/life-sync/issues/44):
   Use `Branch` for manage `~/dotfiles` branches.
-  Core module with internal types.
   `life switch` branch management subcommand.
 
 # 1.0.2
 
 * [#42](https://github.com/kowainik/life-sync/issues/42):
   Create newtype `Branch`.
+
+* [#48](https://github.com/kowainik/life-sync/issues/48):
+  Fix minor bug with broken `life add -d`.
+
+* [#49](https://github.com/kowainik/life-sync/issues/49):
+  Core module with internal types.
+  
 
 # 1.0.1
 

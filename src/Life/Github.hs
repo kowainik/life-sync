@@ -1,11 +1,9 @@
 -- | Utilities to work with GitHub repositories using "hub".
 
 module Life.Github
-       ( Owner  (..)
-       , Repo   (..)
-
+       (
          -- * Repository utils
-       , checkRemoteSync
+         checkRemoteSync
        , cloneRepo
        , insideRepo
        , isBranchExists

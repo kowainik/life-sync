@@ -9,7 +9,6 @@
 
 module Life.Configuration
        ( LifeConfiguration  (..)
-
        , getBranch
        , getBranchName
        , singleDirConfig
@@ -48,7 +47,6 @@ import qualified Data.Text as T
 import qualified Relude.Unsafe as Unsafe
 import qualified Text.Show as Show
 import qualified Toml
-
 
 ----------------------------------------------------------------------------
 -- Life Configuration data type with lenses

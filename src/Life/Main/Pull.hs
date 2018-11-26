@@ -7,7 +7,8 @@ module Life.Main.Pull
 import Path (Dir, File, Path, Rel)
 
 import Life.Configuration (LifeConfiguration (..), getBranch, parseHomeLife)
-import Life.Github (Owner, cloneRepo, pullUpdateFromRepo, master, updateFromRepo, setCurrentBranch)
+import Life.Core (Owner)
+import Life.Github (cloneRepo, pullUpdateFromRepo, master, updateFromRepo, setCurrentBranch)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, choose, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
