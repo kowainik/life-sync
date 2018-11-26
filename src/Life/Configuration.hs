@@ -8,7 +8,7 @@
 -- | Contains configuration data type.
 
 module Life.Configuration
-       ( LifeConfiguration  (..)
+       ( LifeConfiguration (..)
        , singleDirConfig
        , singleFileConfig
 
@@ -38,6 +38,7 @@ import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFil
 import Toml (AnyValue (..), BiToml, Prism (..), (.=))
 
 import Life.Shell (lifePath, relativeToHome, repoName)
+import Life.Core (Branch (..), master)
 
 import qualified Data.Set as Set
 import qualified Data.Text as T
@@ -51,6 +52,7 @@ import qualified Toml
 data LifeConfiguration = LifeConfiguration
      { lifeConfigurationFiles       :: Set (Path Rel File)
      , lifeConfigurationDirectories :: Set (Path Rel Dir)
+     , lifeConfigurationBranch      :: Last Branch
      } deriving (Show, Eq)
 
 makeFields ''LifeConfiguration
@@ -66,7 +68,7 @@ instance Semigroup LifeConfiguration where
         }
 
 instance Monoid LifeConfiguration where
-    mempty  = LifeConfiguration mempty mempty
+    mempty  = LifeConfiguration mempty mempty (Last $ Just master)
     mappend = (<>)
 
 singleFileConfig :: Path Rel File -> LifeConfiguration
@@ -85,6 +87,7 @@ lifeConfigMinus :: LifeConfiguration -- ^ repo .life config
 lifeConfigMinus dotfiles global = LifeConfiguration
     (Set.difference (dotfiles ^. files) (global ^. files))
     (Set.difference (dotfiles ^. directories) (global ^. directories))
+    (Last $ Just master)
 
 ----------------------------------------------------------------------------
 -- Toml parser for life configuration
