@@ -65,6 +65,7 @@ instance Semigroup LifeConfiguration where
     life1 <> life2 = LifeConfiguration
         { lifeConfigurationFiles       = life1^.files <> life2^.files
         , lifeConfigurationDirectories = life1^.directories <> life2^.directories
+        , lifeConfigurationBranch      = life1^.branch <> life2^.branch
         }
 
 instance Monoid LifeConfiguration where
@@ -117,6 +118,7 @@ resurrect CorpseConfiguration{..} = do
     pure $ LifeConfiguration
         { lifeConfigurationFiles = Set.fromList filePaths
         , lifeConfigurationDirectories = Set.fromList dirPaths
+        , lifeConfigurationBranch = Last (Just master)
         }
 
 -- TODO: should tomland one day support this?...

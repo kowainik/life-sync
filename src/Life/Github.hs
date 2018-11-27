@@ -16,9 +16,6 @@ module Life.Github
        , removeFromRepo
        , updateDotfilesRepo
        , updateFromRepo
-
-         -- * Constants
-       , master
        ) where
 
 import Control.Exception (catch, throwIO)

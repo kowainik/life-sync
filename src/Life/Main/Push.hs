@@ -13,7 +13,7 @@ import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
 import Life.Configuration (LifeConfiguration (..), directories, files, lifeConfigMinus,
                            parseHomeLife, parseRepoLife)
 import Life.Core (master)
-import Life.Github (master, updateDotfilesRepo, withSynced)
+import Life.Github (updateDotfilesRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
