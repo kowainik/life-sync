@@ -11,6 +11,7 @@ module Life.Configuration
        ( LifeConfiguration (..)
        , singleDirConfig
        , singleFileConfig
+       , defLifeConfig
 
        , lifeConfigMinus
 
@@ -69,8 +70,11 @@ instance Semigroup LifeConfiguration where
         }
 
 instance Monoid LifeConfiguration where
-    mempty  = LifeConfiguration mempty mempty (Last $ Just master)
+    mempty  = LifeConfiguration mempty mempty mempty
     mappend = (<>)
+
+defLifeConfig :: LifeConfiguration
+defLifeConfig = LifeConfiguration mempty mempty (Last $ Just master)
 
 singleFileConfig :: Path Rel File -> LifeConfiguration
 singleFileConfig file = mempty & files .~ one file
