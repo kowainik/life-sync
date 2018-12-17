@@ -144,7 +144,7 @@ renderLifeConfiguration printIfEmpty LifeConfiguration{..} = mconcat $
 writeGlobalLife :: LifeConfiguration -> IO ()
 writeGlobalLife config = do
     lifeFilePath <- relativeToHome lifePath
-    writeFile (fromAbsFile lifeFilePath) (renderLifeConfiguration True config)
+    writeFileText (fromAbsFile lifeFilePath) (renderLifeConfiguration True config)
 
 ----------------------------------------------------------------------------
 -- Life configuration parsing
@@ -157,7 +157,7 @@ parseLifeConfiguration tomlText = case Toml.decode corpseConfiguationT tomlText 
 
 parseLife :: Path Rel File -> IO LifeConfiguration
 parseLife path = relativeToHome path
-             >>= readFile . fromAbsFile
+             >>= readFileText . fromAbsFile
              >>= parseLifeConfiguration
 
 -- | Reads 'LifeConfiguration' from @~\/.life@ file.
