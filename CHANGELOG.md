@@ -18,6 +18,7 @@ The change log is available [on GitHub][2].
 
 * [#59](https://github.com/kowainik/life-sync/issues/59):
   Bump to relude-0.4.0.
+  Bump to GHC-8.4.4.
 
 
 # 1.0.1
