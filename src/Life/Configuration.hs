@@ -11,7 +11,7 @@ module Life.Configuration
        ( LifeConfiguration (..)
        , singleDirConfig
        , singleFileConfig
-       , defLifeConfig
+       , defaultLifeConfig
 
        , lifeConfigMinus
 
@@ -73,8 +73,8 @@ instance Monoid LifeConfiguration where
     mempty  = LifeConfiguration mempty mempty mempty
     mappend = (<>)
 
-defLifeConfig :: LifeConfiguration
-defLifeConfig = LifeConfiguration mempty mempty (Last $ Just master)
+defaultLifeConfig :: LifeConfiguration
+defaultLifeConfig = LifeConfiguration mempty mempty (Last $ Just master)
 
 singleFileConfig :: Path Rel File -> LifeConfiguration
 singleFileConfig file = mempty & files .~ one file
