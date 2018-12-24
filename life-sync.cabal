@@ -13,7 +13,7 @@ stability:           experimental
 build-type:          Simple
 cabal-version:       2.0
 tested-with:         GHC == 8.2.2
-                   , GHC == 8.4.3
+                   , GHC == 8.4.4
 extra-doc-files:     README.md
                    , CHANGELOG.md
 
@@ -47,7 +47,7 @@ library
                      , path
                      , path-io
                      , process
-                     , relude >= 0.1.0
+                     , relude >= 0.4.0
                      , text >= 1.2
                      , tomland ^>= 0.3
 
