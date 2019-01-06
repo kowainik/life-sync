@@ -16,9 +16,6 @@ module Life.Github
        , removeFromRepo
        , updateDotfilesRepo
        , updateFromRepo
-
-         -- * Constants
-       , master
        ) where
 
 import Control.Exception (catch, throwIO)
@@ -27,7 +24,7 @@ import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 import System.IO.Error (IOError, isDoesNotExistError)
 
 import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLife)
-import Life.Core(Branch(..), Repo(..), Owner(..), CopyDirection(..))
+import Life.Core(Branch(..), Repo(..), Owner(..), CopyDirection(..), master)
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
@@ -199,6 +196,3 @@ removeFromRepo removeFun path = do
         then errorMessage ("File/directory " <> pathTextName <> " is not found") >> exitFailure
         else throwIO e
 
--- | Git "master" branch constant.
-master :: Branch
-master = Branch "master"

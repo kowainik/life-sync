@@ -13,8 +13,8 @@ import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, 
 
 import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife,
                            writeGlobalLife)
-import Life.Core (LifePath (..))
-import Life.Github (addToRepo, master, withSynced)
+import Life.Core (LifePath (..), master)
+import Life.Github (addToRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, errorMessage, infoMessage, warningMessage)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)

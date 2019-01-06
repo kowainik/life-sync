@@ -12,7 +12,8 @@ import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
 
 import Life.Configuration (LifeConfiguration (..), directories, files, lifeConfigMinus,
                            parseHomeLife, parseRepoLife)
-import Life.Github (master, updateDotfilesRepo, withSynced)
+import Life.Core (master)
+import Life.Github (updateDotfilesRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
@@ -55,6 +56,7 @@ lifePush = whatIsLife >>= \case
         pure $ LifeConfiguration
             <$> checkPaths eFiles
             <*> checkPaths eDirs
+            <*> Success (Last $ Just master)
       where
         withExist :: (Path Abs f -> IO Bool) -> Path Rel f -> IO (Path Rel f, Bool)
         withExist doesExist path = (path,) <$> (relativeToHome path >>= doesExist)

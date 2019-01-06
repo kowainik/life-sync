@@ -8,9 +8,10 @@
 -- | Contains configuration data type.
 
 module Life.Configuration
-       ( LifeConfiguration  (..)
+       ( LifeConfiguration (..)
        , singleDirConfig
        , singleFileConfig
+       , defaultLifeConfig
 
        , lifeConfigMinus
 
@@ -38,6 +39,7 @@ import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFil
 import Toml (AnyValue (..), BiToml, Prism (..), (.=))
 
 import Life.Shell (lifePath, relativeToHome, repoName)
+import Life.Core (Branch (..), master)
 
 import qualified Data.Set as Set
 import qualified Data.Text as T
@@ -51,6 +53,7 @@ import qualified Toml
 data LifeConfiguration = LifeConfiguration
      { lifeConfigurationFiles       :: Set (Path Rel File)
      , lifeConfigurationDirectories :: Set (Path Rel Dir)
+     , lifeConfigurationBranch      :: Last Branch
      } deriving (Show, Eq)
 
 makeFields ''LifeConfiguration
@@ -63,11 +66,15 @@ instance Semigroup LifeConfiguration where
     life1 <> life2 = LifeConfiguration
         { lifeConfigurationFiles       = life1^.files <> life2^.files
         , lifeConfigurationDirectories = life1^.directories <> life2^.directories
+        , lifeConfigurationBranch      = life1^.branch <> life2^.branch
         }
 
 instance Monoid LifeConfiguration where
-    mempty  = LifeConfiguration mempty mempty
+    mempty  = LifeConfiguration mempty mempty mempty
     mappend = (<>)
+
+defaultLifeConfig :: LifeConfiguration
+defaultLifeConfig = LifeConfiguration mempty mempty (Last $ Just master)
 
 singleFileConfig :: Path Rel File -> LifeConfiguration
 singleFileConfig file = mempty & files .~ one file
@@ -85,6 +92,7 @@ lifeConfigMinus :: LifeConfiguration -- ^ repo .life config
 lifeConfigMinus dotfiles global = LifeConfiguration
     (Set.difference (dotfiles ^. files) (global ^. files))
     (Set.difference (dotfiles ^. directories) (global ^. directories))
+    (Last $ Just master)
 
 ----------------------------------------------------------------------------
 -- Toml parser for life configuration
@@ -114,6 +122,7 @@ resurrect CorpseConfiguration{..} = do
     pure $ LifeConfiguration
         { lifeConfigurationFiles = Set.fromList filePaths
         , lifeConfigurationDirectories = Set.fromList dirPaths
+        , lifeConfigurationBranch = Last (Just master)
         }
 
 -- TODO: should tomland one day support this?...

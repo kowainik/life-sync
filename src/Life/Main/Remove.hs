@@ -12,8 +12,8 @@ import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir
 
 import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife,
                            writeGlobalLife)
-import Life.Core (LifePath (..))
-import Life.Github (master, removeFromRepo, withSynced)
+import Life.Core (LifePath (..), master)
+import Life.Github (removeFromRepo, withSynced)
 import Life.Message (abortCmd, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
 

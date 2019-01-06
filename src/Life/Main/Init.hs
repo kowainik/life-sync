@@ -12,7 +12,7 @@ import Path.IO (doesDirExist, doesFileExist)
 
 import Life.Configuration (LifeConfiguration (..), parseHomeLife, renderLifeConfiguration,
                            singleFileConfig, writeGlobalLife)
-import Life.Core (CopyDirection (..), Owner (..), Repo(..))
+import Life.Core (CopyDirection (..), Owner (..), Repo(..), master)
 import Life.Github (copyLife, createRepository, insideRepo)
 import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
                      successMessage, warningMessage)
@@ -84,8 +84,8 @@ scanConfig :: LifeConfiguration -> IO (LifeConfiguration, LifeConfiguration)
 scanConfig LifeConfiguration{..} = do
     (existingFiles, nonExistingFiles) <- partitionM (relativeToHome >=> doesFileExist) lifeConfigurationFiles
     (existingDirs, nonExistingDirs) <- partitionM (relativeToHome >=> doesDirExist) lifeConfigurationDirectories
-    pure ( LifeConfiguration (Set.fromList existingFiles) (Set.fromList existingDirs)
-         , LifeConfiguration (Set.fromList nonExistingFiles) (Set.fromList nonExistingDirs)
+    pure ( LifeConfiguration (Set.fromList existingFiles) (Set.fromList existingDirs) (Last $ Just master)
+         , LifeConfiguration (Set.fromList nonExistingFiles) (Set.fromList nonExistingDirs) (Last $ Just master)
          )
 
 partitionM :: forall f m a . (Monad m, Foldable f) => (a -> m Bool) -> f a -> m ([a], [a])

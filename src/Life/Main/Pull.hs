@@ -6,9 +6,9 @@ module Life.Main.Pull
 
 import Path (Dir, File, Path, Rel)
 
-import Life.Configuration (LifeConfiguration (..))
+import Life.Configuration (LifeConfiguration (..), defaultLifeConfig)
 import Life.Github (cloneRepo, pullUpdateFromRepo, updateFromRepo)
-import Life.Core (Owner)
+import Life.Core (Owner, master)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, choose, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
@@ -32,7 +32,9 @@ lifePull owner withoutFiles withoutDirs = whatIsLife >>= \case
             _   -> error "Impossible choice"
 
     life :: LifeConfiguration
-    life = LifeConfiguration withoutFiles withoutDirs
+    life = defaultLifeConfig { lifeConfigurationDirectories = withoutDirs
+                             , lifeConfigurationFiles = withoutFiles
+                             }
 
     clone, update, pullUpdate :: IO ()
     clone = cloneRepo owner

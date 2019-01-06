@@ -5,6 +5,7 @@ module Life.Core
     , Owner  (..)
     , Repo   (..)
     , CommitMsg (..)
+    , master
 
     -- * File system logic
     , CopyDirection (..)
@@ -31,6 +32,10 @@ newtype CommitMsg = CommitMsg { unCommitMsg :: Text } deriving (Show)
 
 instance IsString CommitMsg where
     fromString = CommitMsg . T.pack
+
+-- | Git "master" branch constant.
+master :: Branch
+master = Branch "master"
 
 ----------------------------------------------------------------------------
 -- File system logic
