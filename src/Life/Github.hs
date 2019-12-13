@@ -96,7 +96,7 @@ doesBranchExist (Branch branch) = do
 
 withSynced :: Branch -> IO a -> IO a
 withSynced branch@(Branch branchname) action = insideRepo $ do
-    infoMessage "Checking if repo is synchnorized..."
+    infoMessage "Checking if repo is synchronized..."
     isSynced <- checkRemoteSync branch
     if isSynced then do
         infoMessage "Repo is up-to-date"
