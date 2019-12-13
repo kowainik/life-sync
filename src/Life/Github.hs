@@ -5,6 +5,7 @@ module Life.Github
          -- * Repository utils
          checkRemoteSync
        , cloneRepo
+       , doesBranchExist
        , insideRepo
        , withSynced
 
@@ -87,9 +88,15 @@ checkRemoteSync (Branch branch) = do
     remoteHash <- "git" $| ["rev-parse", "origin/" <> branch]
     pure $ localHash == remoteHash
 
+-- | Check if a branch exists in remote repo
+doesBranchExist :: Branch -> IO Bool
+doesBranchExist (Branch branch) = do
+    r <- "git" $| ["ls-remote", "--heads", "origin", branch]
+    pure $ not (null r)
+
 withSynced :: Branch -> IO a -> IO a
 withSynced branch@(Branch branchname) action = insideRepo $ do
-    infoMessage "Checking if repo is synchnorized..."
+    infoMessage "Checking if repo is synchronized..."
     isSynced <- checkRemoteSync branch
     if isSynced then do
         infoMessage "Repo is up-to-date"
@@ -158,6 +165,13 @@ copyPathList copyAction direction pathList = do
             FromHomeToRepo -> copyAction homePath repoPath
             FromRepoToHome -> copyAction repoPath homePath
 
+-- | Update .life file
+updateLifeFile :: IO ()
+updateLifeFile = do
+    lifeFile <- relativeToHome lifePath
+    repoLifeFile <- relativeToHome (repoName </> lifePath)
+    copyFile lifeFile repoLifeFile
+
 -- | Adds file or directory to the repository and commits
 addToRepo :: (Path Abs t -> Path Abs t -> IO ()) -> Path Rel t -> IO ()
 addToRepo copyFun path = do
@@ -166,10 +180,7 @@ addToRepo copyFun path = do
     destinationPath <- relativeToHome (repoName </> path)
     copyFun sourcePath destinationPath
 
-    -- update .life file
-    lifeFile <- relativeToHome lifePath
-    repoLifeFile <- relativeToHome (repoName </> lifePath)
-    copyFile lifeFile repoLifeFile
+    updateLifeFile
 
     let commitMsg = "Add: " <> toText (toFilePath path)
     pushRepo commitMsg
@@ -180,10 +191,7 @@ removeFromRepo removeFun path = do
     absPath <- relativeToHome (repoName </> path)
     catch (removeFun absPath) handleNotExist
 
-    -- update .life file
-    lifeFile <- relativeToHome lifePath
-    repoLifeFile <- relativeToHome (repoName </> lifePath)
-    copyFile lifeFile repoLifeFile
+    updateLifeFile
 
     let commitMsg = "Remove: " <> pathTextName
     pushRepo commitMsg
