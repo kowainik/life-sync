@@ -165,6 +165,13 @@ copyPathList copyAction direction pathList = do
             FromHomeToRepo -> copyAction homePath repoPath
             FromRepoToHome -> copyAction repoPath homePath
 
+-- | Update .life file
+updateLifeFile :: IO ()
+updateLifeFile = do
+    lifeFile <- relativeToHome lifePath
+    repoLifeFile <- relativeToHome (repoName </> lifePath)
+    copyFile lifeFile repoLifeFile
+
 -- | Adds file or directory to the repository and commits
 addToRepo :: (Path Abs t -> Path Abs t -> IO ()) -> Path Rel t -> IO ()
 addToRepo copyFun path = do
@@ -173,10 +180,7 @@ addToRepo copyFun path = do
     destinationPath <- relativeToHome (repoName </> path)
     copyFun sourcePath destinationPath
 
-    -- update .life file
-    lifeFile <- relativeToHome lifePath
-    repoLifeFile <- relativeToHome (repoName </> lifePath)
-    copyFile lifeFile repoLifeFile
+    updateLifeFile
 
     let commitMsg = "Add: " <> toText (toFilePath path)
     pushRepo commitMsg
@@ -187,10 +191,7 @@ removeFromRepo removeFun path = do
     absPath <- relativeToHome (repoName </> path)
     catch (removeFun absPath) handleNotExist
 
-    -- update .life file
-    lifeFile <- relativeToHome lifePath
-    repoLifeFile <- relativeToHome (repoName </> lifePath)
-    copyFile lifeFile repoLifeFile
+    updateLifeFile
 
     let commitMsg = "Remove: " <> pathTextName
     pushRepo commitMsg
