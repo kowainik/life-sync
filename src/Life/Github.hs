@@ -5,6 +5,7 @@ module Life.Github
          -- * Repository utils
          checkRemoteSync
        , cloneRepo
+       , doesBranchExist
        , insideRepo
        , withSynced
 
@@ -86,6 +87,12 @@ checkRemoteSync (Branch branch) = do
     localHash  <- "git" $| ["rev-parse", branch]
     remoteHash <- "git" $| ["rev-parse", "origin/" <> branch]
     pure $ localHash == remoteHash
+
+-- | Check if a branch exists in remote repo
+doesBranchExist :: Branch -> IO Bool
+doesBranchExist (Branch branch) = do
+    r <- "git" $| ["ls-remote", "--heads", "origin", branch]
+    pure $ not (null r)
 
 withSynced :: Branch -> IO a -> IO a
 withSynced branch@(Branch branchname) action = insideRepo $ do
