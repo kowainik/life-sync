@@ -5,6 +5,7 @@ module Life.Github
          -- * Repository utils
          checkRemoteSync
        , cloneRepo
+       , createNewBranch
        , doesBranchExist
        , insideRepo
        , withSynced
@@ -79,6 +80,11 @@ cloneRepo (Owner owner) = do
     withCurrentDir homeDir $ do
         infoMessage "Using SSH to clone repo..."
         "git" ["clone", "git@github.com:" <> owner <> "/dotfiles.git"]
+
+-- | Create new branch with given branch name
+createNewBranch :: Branch -> IO ()
+createNewBranch (Branch branch) =
+    "git" ["checkout", "-b", branch]
 
 -- | Returns true if local @dotfiles@ repository is synchronized with remote repo.
 checkRemoteSync :: Branch -> IO Bool

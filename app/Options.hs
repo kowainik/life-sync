@@ -94,7 +94,7 @@ pullOptionsParser = do
 -- life add and remove
 ----------------------------------------------------------------------------
 
-data PathOptions = PathOptions
+newtype PathOptions = PathOptions
      { pathOptionsPath :: LifePath
      } deriving (Show)
 
