@@ -13,7 +13,7 @@ import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, choose, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
 
-lifePull :: Owner -> Set (Path Rel File) -> Set (Path Rel Dir) -> IO ()
+lifePull :: Maybe Owner -> Set (Path Rel File) -> Set (Path Rel Dir) -> IO ()
 lifePull owner withoutFiles withoutDirs = whatIsLife >>= \case
     OnlyRepo _ -> warningMessage ".life file not found" >> pullUpdate
     OnlyLife _ -> warningMessage "dotfiles not found" >> clone >> update

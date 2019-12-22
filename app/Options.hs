@@ -1,4 +1,5 @@
 {-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 -- | Command line options for Importify
 
@@ -11,13 +12,13 @@ module Options
        ) where
 
 import Options.Applicative (Parser, ParserInfo, command, execParser, fullDesc, help, helper, info,
-                            long, metavar, progDesc, short, strArgument, strOption, subparser)
+                            long, metavar, progDesc, short, strOption, subparser)
 
 import Life.Core (LifePath (..), Owner (..))
 
 -- | Commands to execute
 data LifeCommand
-    = Init   Owner
+    = Init   (Maybe Owner)
     | Add    PathOptions
     | Remove PathOptions
     | Push
@@ -31,7 +32,7 @@ data LifeCommand
 commandParser :: Parser LifeCommand
 commandParser = subparser $
     command "init"
-            (info (helper <*> fmap Init ownerParser)
+            (info (helper <*> fmap Init (optional ownerParser))
                   (fullDesc <> progDesc "Initialize GitHub repository named 'dotfiles' if you don't have one."))
  <> command "add"
             (info (helper <*> fmap Add pathOptionsParser)
@@ -57,7 +58,7 @@ parseCommand = execParser optionsInfo
 
 ownerParser :: Parser Owner
 ownerParser = fmap Owner
-     $ strArgument
+     $ strOption
      $ metavar "OWNER"
     <> help "Your github user name"
 
@@ -66,14 +67,14 @@ ownerParser = fmap Owner
 ----------------------------------------------------------------------------
 
 data PullOptions = PullOptions
-    { pullOptionsOwner   :: Owner
+    { pullOptionsOwner   :: Maybe Owner
     , pullOptionsNoFiles :: [FilePath]
     , pullOptionsNoDirs  :: [FilePath]
     } deriving (Show)
 
 pullOptionsParser :: Parser PullOptions
 pullOptionsParser = do
-    pullOptionsOwner <- ownerParser
+    pullOptionsOwner   <- optional ownerParser
 
     -- TODO: reuse LifePath parser here?...
     pullOptionsNoFiles <- many $ strOption

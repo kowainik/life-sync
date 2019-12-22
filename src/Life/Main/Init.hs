@@ -35,7 +35,7 @@ predefinedLifeConfig = mempty
           ]
     }
 
-lifeInit :: Owner -> IO ()
+lifeInit :: Maybe Owner -> IO ()
 lifeInit owner = whatIsLife >>= \case
     NoLife -> createLifeFile >>= createDotfilesDir
     OnlyLife _ -> askCreateLife >>= createDotfilesDir
@@ -109,6 +109,6 @@ lifeInitQuestion cmd process = do
         infoMessage "Initialization process starts.."
         skipMessage "Insert your GitHub username:"
         owner <- promptNonEmpty
-        lifeInit $ Owner owner
+        lifeInit $ Just $ Owner owner
         process
     else abortCmd cmd "'~/.life' file is not initialized"
