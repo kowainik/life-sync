@@ -8,7 +8,7 @@ import Path (Dir, File, Path, Rel)
 
 import Life.Configuration (LifeConfiguration (..), defaultLifeConfig)
 import Life.Github (cloneRepo, pullUpdateFromRepo, updateFromRepo)
-import Life.Core (Owner, master)
+import Life.Core (Owner)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, choose, warningMessage)
 import Life.Shell (LifeExistence (..), whatIsLife)
