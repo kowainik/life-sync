@@ -18,7 +18,7 @@ module Life.Github
        , removeFromRepo
        , updateDotfilesRepo
        , updateFromRepo
-       , getUsername
+       , getUserLogin
        ) where
 
 import Control.Exception (catch, throwIO)
@@ -56,21 +56,23 @@ pushka (Branch branch) commitMsg = do
 -- | Creates repository on GitHub inside given folder.
 createRepository :: Maybe Owner -> Repo -> IO ()
 createRepository mo (Repo repo) = do
-    owner <- case mo of
-          Nothing -> getUsername
-          Just (Owner o) -> pure o
+    owner <- getOwnerLogin mo
     let description = ":computer: Configuration files"
     "git" ["init"]
     "hub" ["create", "-d", description, owner <> "/" <> repo]
     pushka master "Create the project"
 
--- | Get current user name from the local global git config.
-getUsername :: IO Text
-getUsername = do
-    login <- "git" $| ["config", "user.name"]
+-- | Get user login from the local global git config.
+getUserLogin :: IO Text
+getUserLogin = do
+    login <- "git" $| ["config", "user.login"]
     if login == ""
         then errorMessage "user.login is not specified" >> exitFailure
         else pure $ pack login
+
+-- | Consider owner from global git config if Owner is not given
+getOwnerLogin :: Maybe Owner -> IO Text
+getOwnerLogin = maybe getUserLogin (pure . unOwner)
 
 ----------------------------------------------------------------------------
 -- dotfiles workflow
@@ -89,9 +91,7 @@ pushRepo = insideRepo . askToPushka
 -- | Clones @dotfiles@ repository assuming it doesn't exist.
 cloneRepo :: Maybe Owner -> IO ()
 cloneRepo mo = do
-    owner <- case mo of
-        Nothing -> getUsername
-        Just (Owner o) -> pure o
+    owner <- getOwnerLogin mo
     homeDir <- getHomeDir
     withCurrentDir homeDir $ do
         infoMessage "Using SSH to clone repo..."
