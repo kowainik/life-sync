@@ -19,10 +19,13 @@ cabal-dev
 cabal.sandbox.config
 cabal.config
 cabal.project.local
-.HTF/
 .ghc.environment.*
+.HTF/
 # Stack
 .stack-work/
+stack.yaml.lock
+# Nix
+result
 
 ### IDE/support
 # Vim

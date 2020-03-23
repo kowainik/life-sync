@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds              #-}
 {-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE ScopedTypeVariables    #-}
 {-# LANGUAGE TemplateHaskell        #-}
 
@@ -36,10 +35,10 @@ import Control.Monad.Catch (MonadThrow (..))
 import Fmt (indentF, unlinesF, (+|), (|+))
 import Lens.Micro.Platform (makeFields, (.~), (^.))
 import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))
-import Toml (AnyValue (..), BiToml, Prism (..), (.=))
+import Toml (TomlCodec, (.=))
 
-import Life.Shell (lifePath, relativeToHome, repoName)
 import Life.Core (Branch (..), master)
+import Life.Shell (lifePath, relativeToHome, repoName)
 
 import qualified Data.Set as Set
 import qualified Data.Text as T
@@ -54,7 +53,7 @@ data LifeConfiguration = LifeConfiguration
      { lifeConfigurationFiles       :: Set (Path Rel File)
      , lifeConfigurationDirectories :: Set (Path Rel Dir)
      , lifeConfigurationBranch      :: Last Branch
-     } deriving (Show, Eq)
+     } deriving stock (Show, Eq)
 
 makeFields ''LifeConfiguration
 
@@ -103,16 +102,10 @@ data CorpseConfiguration = CorpseConfiguration
     , corpseDirectories :: [FilePath]
     }
 
-corpseConfiguationT :: BiToml CorpseConfiguration
+corpseConfiguationT :: TomlCodec CorpseConfiguration
 corpseConfiguationT = CorpseConfiguration
-    <$> Toml.arrayOf _String "files"       .= corpseFiles
-    <*> Toml.arrayOf _String "directories" .= corpseDirectories
-  where
-    _String :: Prism AnyValue String
-    _String = Prism
-        { preview = \(AnyValue t) -> (toString <$> Toml.matchText t)
-        , review = AnyValue . Toml.Text . toText
-        }
+    <$> Toml.arrayOf Toml._String "files"       .= corpseFiles
+    <*> Toml.arrayOf Toml._String "directories" .= corpseDirectories
 
 resurrect :: MonadThrow m => CorpseConfiguration -> m LifeConfiguration
 resurrect CorpseConfiguration{..} = do

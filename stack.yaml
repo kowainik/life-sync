@@ -1,9 +1,4 @@
-resolver: lts-12.23
+resolver: lts-15.5
 
 extra-deps:
-- base-noprelude-4.11.1.0
-- fmt-0.6
-- relude-0.4.0
-
-ghc-options:
-  "$locals": -fhide-source-paths
+  - fmt-0.6

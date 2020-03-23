@@ -1,4 +1,6 @@
-module Test.Roundtrip where
+module Test.Roundtrip
+    ( hprop_ConfigurationRoundtrip
+    ) where
 
 import Data.Foldable (foldr1)
 import Hedgehog (Gen, Property, forAll, property, tripping)
@@ -6,6 +8,7 @@ import Path.Internal (Path (Path))
 import System.FilePath (pathSeparator, (</>))
 
 import Life.Configuration (LifeConfiguration (..), parseLifeConfiguration, renderLifeConfiguration)
+import Life.Core (master)
 
 import qualified Data.Set as Set
 import qualified Hedgehog.Gen as Gen
@@ -20,6 +23,7 @@ genLifeConfiguration :: Gen LifeConfiguration
 genLifeConfiguration = do
     lifeConfigurationFiles       <- genPathSet genFilePath
     lifeConfigurationDirectories <- genPathSet genDirPath
+    let lifeConfigurationBranch = Last $ Just master
     pure LifeConfiguration{..}
 
 -- it's safe to use 'Path' constructor here even if such things are not recommended by API

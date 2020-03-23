@@ -22,13 +22,12 @@ module Life.Github
        ) where
 
 import Control.Exception (catch, throwIO)
-import Data.Text (pack)
 import Path (Abs, Dir, File, Path, Rel, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
 import System.IO.Error (IOError, isDoesNotExistError)
 
 import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLife)
-import Life.Core(Branch(..), Repo(..), Owner(..), CopyDirection(..), master)
+import Life.Core (Branch (..), CopyDirection (..), Owner (..), Repo (..), master)
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Shell (lifePath, relativeToHome, repoName, ($|))
 
@@ -68,7 +67,7 @@ getUserLogin = do
     login <- "git" $| ["config", "user.login"]
     if login == ""
         then errorMessage "user.login is not specified" >> exitFailure
-        else pure $ pack login
+        else pure $ toText login
 
 -- | Consider owner from global git config if Owner is not given
 getOwnerLogin :: Maybe Owner -> IO Text
@@ -225,4 +224,3 @@ removeFromRepo removeFun path = do
     handleNotExist e = if isDoesNotExistError e
         then errorMessage ("File/directory " <> pathTextName <> " is not found") >> exitFailure
         else throwIO e
-
