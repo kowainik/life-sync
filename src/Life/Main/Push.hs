@@ -9,6 +9,7 @@ module Life.Main.Push
 import Lens.Micro.Platform ((^.))
 import Path (Abs, Path, Rel, toFilePath, (</>))
 import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
+import Validation (Validation (..))
 
 import Life.Configuration (LifeConfiguration (..), directories, files, lifeConfigMinus,
                            parseHomeLife, parseRepoLife)
@@ -17,10 +18,10 @@ import Life.Github (updateDotfilesRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
-import Life.Validation (Validation (..))
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text
+
 
 lifePush :: IO ()
 lifePush = whatIsLife >>= \case

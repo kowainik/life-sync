@@ -2,3 +2,4 @@ resolver: lts-15.5
 
 extra-deps:
   - fmt-0.6
+  - validation-selective-0.0.0.0
