@@ -1,79 +1,31 @@
 sudo: true
-language: haskell
+language: generic
 
 git:
   depth: 5
 
 cache:
   directories:
-  - "$HOME/.cabal"
-  - "$HOME/.ghc"
   - "$HOME/.stack"
   - "$TRAVIS_BUILD_DIR/.stack-work"
 
 matrix:
   include:
-
-  - ghc: 8.2.2
-    env: GHCVER='8.2.2' CABALVER='head'
-    os: linux
-    addons:
-      apt:
-        sources:
-        - hvr-ghc
-        packages:
-        - ghc-8.2.2
-        - cabal-install-head
-
-  - ghc: 8.4.4
-    env: GHCVER='8.4.4' CABALVER='head'
-    os: linux
-    addons:
-      apt:
-        sources:
-        - hvr-ghc
-        packages:
-        - ghc-8.4.4
-        - cabal-install-head
-
-  - ghc: 8.4.4
-    env: STACK_YAML="$TRAVIS_BUILD_DIR/stack.yaml"
-    os: linux
-    addons:
-      apt:
-        packages:
-        - libgmp-dev
+  - os: linux
+  - os: osx
 
 install:
-  - |
-    if [ -z "$STACK_YAML" ]; then
-      export PATH="/opt/ghc/$GHCVER/bin:/opt/cabal/$CABALVER/bin:$PATH"
-      echo $PATH
-      cabal new-update
-      cabal new-build --enable-tests --enable-benchmarks
-    else
-      echo "$TRAVIS_BUILD_DIR"
-      mkdir -p ~/.local/bin
-      export PATH="$HOME/.local/bin:$PATH"
-      travis_retry curl -L 'https://www.stackage.org/stack/linux-x86_64' | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
-      stack --version
-      stack setup --no-terminal
-      stack ghc -- --version
-      stack build --only-dependencies --no-terminal
-    fi
+  # HLint check
+  - curl https://raw.githubusercontent.com/kowainik/relude/v0.6.0.0/.hlint.yaml -o .hlint-relude.yaml
+  - curl -sSL https://raw.github.com/ndmitchell/neil/master/misc/travis.sh | sh -s -- hlint -h .hlint-relude.yaml src/
+
+  # install stack and build project
+  - curl -sSL https://get.haskellstack.org/ | sh
+  - stack --version
+  - stack build --test --no-run-tests --bench --no-run-benchmarks
+
 script:
-  - |
-    if [ -z "$STACK_YAML" ]; then
-      cabal new-test
-      cabal new-haddock
-    else
-      stack build --test --bench --no-run-tests --no-run-benchmarks --no-terminal
-    fi
+  - stack test --no-terminal
 
 notifications:
   email: false
-  slack:
-    rooms:
-      - kowainik:BgAK9TdPI0Z6LmG5aE69ap3f
-    on_success: change
-    on_failure: always

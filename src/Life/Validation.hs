@@ -6,7 +6,7 @@ module Life.Validation
 data Validation e a
   = Failure e
   | Success a
-  deriving (Eq, Ord, Show)
+  deriving stock (Eq, Ord, Show)
 
 instance Functor (Validation e) where
    fmap _ (Failure e) = Failure e

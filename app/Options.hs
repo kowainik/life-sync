@@ -1,4 +1,4 @@
-{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE ApplicativeDo       #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -- | Command line options for Importify
@@ -23,7 +23,7 @@ data LifeCommand
     | Remove PathOptions
     | Push
     | Pull   PullOptions
-    deriving (Show)
+    deriving stock (Show)
 
 ---------------------------------------------------------------------------
 -- Boilerplate
@@ -70,7 +70,7 @@ data PullOptions = PullOptions
     { pullOptionsOwner   :: Maybe Owner
     , pullOptionsNoFiles :: [FilePath]
     , pullOptionsNoDirs  :: [FilePath]
-    } deriving (Show)
+    } deriving stock (Show)
 
 pullOptionsParser :: Parser PullOptions
 pullOptionsParser = do
@@ -97,7 +97,7 @@ pullOptionsParser = do
 
 newtype PathOptions = PathOptions
      { pathOptionsPath :: LifePath
-     } deriving (Show)
+     } deriving stock (Show)
 
 pathOptionsParser :: Parser PathOptions
 pathOptionsParser = do
