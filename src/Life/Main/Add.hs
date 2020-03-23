@@ -16,7 +16,7 @@ import Life.Core (LifePath (..), master)
 import Life.Github (addToRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, errorMessage, infoMessage, warningMessage)
-import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
+import Life.Path (LifeExistence (..), relativeToHome, repoName, whatIsLife)
 
 import qualified Data.Set as Set
 

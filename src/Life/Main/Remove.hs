@@ -10,14 +10,14 @@ import Lens.Micro.Platform (Lens', (%~))
 import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife,
-                           writeGlobalLife)
+import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife, writeGlobalLife)
 import Life.Core (LifePath (..), master)
 import Life.Github (removeFromRepo, withSynced)
 import Life.Message (abortCmd, warningMessage)
-import Life.Shell (LifeExistence (..), whatIsLife)
+import Life.Path (LifeExistence (..), whatIsLife)
 
 import qualified Data.Set as Set
+
 
 -- | Remove path from existing life-configuration file.
 lifeRemove :: LifePath -> IO ()

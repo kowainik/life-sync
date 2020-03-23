@@ -17,7 +17,7 @@ import Life.Core (master)
 import Life.Github (updateDotfilesRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd)
-import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
+import Life.Path (LifeExistence (..), relativeToHome, repoName, whatIsLife)
 
 import qualified Data.Set as Set
 import qualified Data.Text as Text

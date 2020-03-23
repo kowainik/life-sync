@@ -12,14 +12,15 @@ import Path.IO (doesDirExist, doesFileExist)
 
 import Life.Configuration (LifeConfiguration (..), parseHomeLife, renderLifeConfiguration,
                            singleFileConfig, writeGlobalLife)
-import Life.Core (CopyDirection (..), Owner (..), Repo(..), master)
+import Life.Core (CopyDirection (..), Owner (..), Repo (..), master)
 import Life.Github (copyLife, createRepository, insideRepo)
 import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
                      successMessage, warningMessage)
-import Life.Shell (LifeExistence (..), createDirInHome, lifePath, relativeToHome, repoName,
-                   whatIsLife)
+import Life.Path (LifeExistence (..), createDirInHome, lifePath, relativeToHome, repoName,
+                  whatIsLife)
 
 import qualified Data.Set as Set
+
 
 predefinedLifeConfig :: LifeConfiguration
 predefinedLifeConfig = mempty
