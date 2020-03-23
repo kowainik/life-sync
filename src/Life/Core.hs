@@ -12,8 +12,6 @@ module Life.Core
     , LifePath (..)
     ) where
 
-import qualified Data.Text as T
-
 ----------------------------------------------------------------------------
 -- Git and Github core
 ----------------------------------------------------------------------------
@@ -40,7 +38,7 @@ newtype CommitMsg = CommitMsg
     } deriving stock (Show)
 
 instance IsString CommitMsg where
-    fromString = CommitMsg . T.pack
+    fromString = CommitMsg . toText
 
 -- | Git "master" branch constant.
 master :: Branch

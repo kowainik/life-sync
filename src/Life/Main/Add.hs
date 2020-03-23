@@ -11,16 +11,15 @@ import Path (Abs, Dir, File, Path, Rel, parent, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, getHomeDir,
                 makeRelative, resolveDir, resolveFile)
 
-import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife,
-                           writeGlobalLife)
+import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife, writeGlobalLife)
 import Life.Core (LifePath (..), master)
 import Life.Github (addToRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd, errorMessage, infoMessage, warningMessage)
 import Life.Shell (LifeExistence (..), relativeToHome, repoName, whatIsLife)
 
-import qualified Data.ByteString.Lazy as LBS
 import qualified Data.Set as Set
+
 
 -- | Add path to existing life-configuration file.
 lifeAdd :: LifePath -> IO ()
@@ -80,8 +79,8 @@ checkEqualFiles path = do
 
     isRepoFile <- doesFileExist repoFilePath
     if isRepoFile then do
-        originContent <- LBS.readFile $ toFilePath homeFilePath
-        repoContent <- LBS.readFile $ toFilePath repoFilePath
+        originContent <- readFileLBS $ toFilePath homeFilePath
+        repoContent <- readFileLBS $ toFilePath repoFilePath
 
         pure $ originContent == repoContent
     else
