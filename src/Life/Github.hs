@@ -28,7 +28,7 @@ import Shellmet (($|))
 import System.IO.Error (IOError, isDoesNotExistError)
 
 import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLife)
-import Life.Core (Branch (..), CopyDirection (..), Owner (..), Repo (..), master)
+import Life.Core (Branch (..), CommitMsg (..), CopyDirection (..), Owner (..), Repo (..), master)
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
 import Life.Path (lifePath, relativeToHome, repoName)
 
@@ -39,7 +39,7 @@ import qualified Data.Text as Text
 -- VSC commands
 ----------------------------------------------------------------------------
 
-askToPushka :: Text -> IO ()
+askToPushka :: CommitMsg -> IO ()
 askToPushka commitMsg = do
     "git" ["add", "."]
     infoMessage "The following changes are going to be pushed:"
@@ -50,8 +50,8 @@ askToPushka commitMsg = do
     else errorMessage "Abort pushing" >> exitFailure
 
 -- | Make a commit and push it.
-pushka :: Branch -> Text -> IO ()
-pushka (Branch branch) commitMsg = do
+pushka :: Branch -> CommitMsg -> IO ()
+pushka (Branch branch) (CommitMsg commitMsg) = do
     "git" ["add", "."]
     "git" ["commit", "-m", commitMsg]
     "git" ["push", "-u", "origin", branch]
@@ -63,7 +63,7 @@ createRepository mo (Repo repo) = do
     let description = ":computer: Configuration files"
     "git" ["init"]
     "hub" ["create", "-d", description, owner <> "/" <> repo]
-    pushka master "Create the project"
+    pushka master $ CommitMsg "Create the project"
 
 -- | Get user login from the local global git config.
 getUserLogin :: IO Text
@@ -88,7 +88,7 @@ insideRepo action = do
     withCurrentDir repoPath action
 
 -- | Commits all changes inside 'repoName' and pushes to remote.
-pushRepo :: Text -> IO ()
+pushRepo :: CommitMsg -> IO ()
 pushRepo = insideRepo . askToPushka
 
 -- | Clones @dotfiles@ repository assuming it doesn't exist.
@@ -154,7 +154,7 @@ updateFromRepo excludeLife = insideRepo $ do
 
     copyLife FromRepoToHome lifeToLive
 
-updateDotfilesRepo :: Text -> LifeConfiguration -> IO ()
+updateDotfilesRepo :: CommitMsg -> LifeConfiguration -> IO ()
 updateDotfilesRepo commitMsg life = do
     copyLife FromHomeToRepo life
     pushRepo commitMsg
@@ -172,13 +172,14 @@ copyFiles = copyPathList copyFile
 copyDirs :: CopyDirection -> [Path Rel Dir] -> IO ()
 copyDirs = copyPathList copyDirRecur
 
-copyPathList :: (Path Abs t -> Path Abs t -> IO ())
-             -- ^ Copying action
-             -> CopyDirection
-             -- ^ Describes in which direction files should be copied
-             -> [Path Rel t]
-             -- ^ List of paths to copy
-             -> IO ()
+copyPathList
+    :: (Path Abs t -> Path Abs t -> IO ())
+    -- ^ Copying action
+    -> CopyDirection
+    -- ^ Describes in which direction files should be copied
+    -> [Path Rel t]
+    -- ^ List of paths to copy
+    -> IO ()
 copyPathList copyAction direction pathList = do
     homeDir    <- getHomeDir
     let repoDir = homeDir </> repoName
@@ -207,7 +208,7 @@ addToRepo copyFun path = do
 
     updateLifeFile
 
-    let commitMsg = "Add: " <> toText (toFilePath path)
+    let commitMsg = CommitMsg $ "Add: " <> toText (toFilePath path)
     pushRepo commitMsg
 
 -- | Removes file or directory from the repository and commits
@@ -218,7 +219,7 @@ removeFromRepo removeFun path = do
 
     updateLifeFile
 
-    let commitMsg = "Remove: " <> pathTextName
+    let commitMsg = CommitMsg $ "Remove: " <> pathTextName
     pushRepo commitMsg
   where
     pathTextName :: Text

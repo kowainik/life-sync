@@ -11,7 +11,7 @@ import Validation (Validation (..))
 
 import Life.Configuration (LifeConfiguration (..), directoriesL, filesL, lifeConfigMinus,
                            parseHomeLife, parseRepoLife)
-import Life.Core (master)
+import Life.Core (CommitMsg (..), master)
 import Life.Github (updateDotfilesRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
 import Life.Message (abortCmd)
@@ -45,7 +45,7 @@ lifePush = whatIsLife >>= \case
 
                 -- copy from local files to repo including .life
                 -- commmit & push
-                updateDotfilesRepo "Push updates" globalConf
+                updateDotfilesRepo (CommitMsg "Push updates") globalConf
 
 
     -- | checks if all the files/dirs from global .life exist.
