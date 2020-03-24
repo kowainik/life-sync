@@ -39,6 +39,7 @@ common common-options
                        -fhide-source-paths
                        -Wmissing-export-lists
                        -Wpartial-fields
+                       -fwrite-ide-info
   if impl(ghc >= 8.8.1)
     ghc-options:       -Wmissing-deriving-strategies
                        -Werror=missing-deriving-strategies
