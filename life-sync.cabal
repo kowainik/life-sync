@@ -104,15 +104,13 @@ test-suite life-sync-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  other-modules:       Test.Roundtrip
+  other-modules:       Test.Configuration
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
 
-  build-tool-depends:  tasty-discover:tasty-discover
   build-depends:       life-sync
                      , containers
-                     , filepath
-                     , hedgehog
+                     , filepath ^>= 1.4
+                     , hedgehog ^>= 1.0
+                     , hspec ^>= 2.7.1
+                     , hspec-hedgehog ^>= 0.0.1.1
                      , path
-                     , tasty
-                     , tasty-hedgehog
-
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N

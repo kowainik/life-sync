@@ -1,11 +1,13 @@
-module Test.Roundtrip
-    ( hprop_ConfigurationRoundtrip
+module Test.Configuration
+    ( configurationSpec
     ) where
 
 import Data.Foldable (foldr1)
-import Hedgehog (Gen, Property, forAll, property, tripping)
+import Hedgehog (Gen, PropertyT, forAll, tripping)
 import Path.Internal (Path (Path))
 import System.FilePath (pathSeparator, (</>))
+import Test.Hspec (Spec, describe, it)
+import Test.Hspec.Hedgehog (hedgehog)
 
 import Life.Configuration (LifeConfiguration (..), parseLifeConfiguration, renderLifeConfiguration)
 import Life.Core (master)
@@ -14,8 +16,14 @@ import qualified Data.Set as Set
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-hprop_ConfigurationRoundtrip :: Property
-hprop_ConfigurationRoundtrip = property $ do
+
+configurationSpec :: Spec
+configurationSpec = describe "Configuration Property Tests" $
+    it "parseLifeConfiguration . renderLifeConfiguration cfg ≡ Just cfg"
+        parseRenderSpec
+
+parseRenderSpec :: PropertyT IO ()
+parseRenderSpec = hedgehog $ do
     cfg <- forAll genLifeConfiguration
     tripping cfg (renderLifeConfiguration True) (parseLifeConfiguration @Maybe)
 
