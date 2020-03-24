@@ -1,7 +1,9 @@
 cabal-version:       2.4
 name:                life-sync
-version:             1.0.2
-description:         Synchronize personal configs across multiple machines
+version:             1.1.0.0
+synopsis:            Synchronize personal configs across multiple machines.
+description:         Synchronize personal configs across multiple machines.
+                     See README for more details.
 homepage:            https://github.com/kowainik/life-sync
 bug-reports:         https://github.com/kowainik/life-sync/issues
 license:             MPL-2.0
