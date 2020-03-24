@@ -73,8 +73,8 @@ library
                        Life.Main.Remove
                        Life.Path
 
-  build-depends:       ansi-terminal
-                     , bytestring
+  build-depends:       bytestring
+                     , colourista ^>= 0.0.0.0
                      , containers
                      , exceptions
                      , fmt
