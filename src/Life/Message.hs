@@ -2,9 +2,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 module Life.Message
-       ( beautyPrint
-       , boldText
-       , prompt
+       ( prompt
        , promptNonEmpty
        , errorMessage
        , warningMessage
@@ -18,10 +16,10 @@ module Life.Message
        , chooseYesNo
        ) where
 
-import System.Console.ANSI (Color (..), ColorIntensity (Vivid), ConsoleIntensity (BoldIntensity),
-                            ConsoleLayer (Foreground), SGR (..), setSGR)
+import Colourista (blue, bold, formatWith)
 import System.IO (hFlush)
 
+import qualified Colourista
 import qualified Data.Text as T
 import qualified Relude.Unsafe as Unsafe
 
@@ -35,31 +33,11 @@ putStrFlush msg = do
     putText msg
     hFlush stdout
 
-setColor :: Color -> IO ()
-setColor color = setSGR [SetColor Foreground Vivid color]
-
--- | Starts bold printing.
-bold :: IO ()
-bold = setSGR [SetConsoleIntensity BoldIntensity]
-
--- | Resets all previous settings.
-reset :: IO ()
-reset = do
-    setSGR [Reset]
-    hFlush stdout
-
--- | Takes list of formatting options, prints text using this format options.
-beautyPrint :: [IO ()] -> Text -> IO ()
-beautyPrint formats msg = do
-    sequence_ formats
-    putText msg
-    reset
-
+{- | Read 'Text' from standard input after arrow prompt.
+-}
 prompt :: IO Text
 prompt = do
-    setColor Blue
-    putStrFlush "  ⟳   "
-    reset
+    putStrFlush $ formatWith [blue] "  ⟳   "
     getLine
 
 promptNonEmpty :: IO Text
@@ -69,25 +47,19 @@ promptNonEmpty = do
         then warningMessage "The answer shouldn't be empty" >> promptNonEmpty
         else pure res
 
-
-boldText :: Text -> IO ()
-boldText message = bold >> putStrFlush message >> reset
-
-boldDefault :: Text -> IO ()
-boldDefault message = boldText (" [" <> message <> "]")
-
-colorMessage :: Color -> Text -> IO ()
-colorMessage color message = do
-    setColor color
-    putTextLn $ "  " <> message
-    reset
+boldDefault :: Text -> Text
+boldDefault message = formatWith [bold] $ " [" <> message <> "]"
 
 errorMessage, warningMessage, successMessage, infoMessage, skipMessage :: Text -> IO ()
-errorMessage   = colorMessage Red
-warningMessage = colorMessage Yellow
-successMessage = colorMessage Green
-infoMessage    = colorMessage Blue
-skipMessage    = colorMessage Cyan
+errorMessage   = Colourista.errorMessage   . indent
+warningMessage = Colourista.warningMessage . indent
+successMessage = Colourista.successMessage . indent
+infoMessage    = Colourista.infoMessage    . indent
+skipMessage    = Colourista.skipMessage    . indent
+
+-- | Add 2 spaces in front.
+indent :: Text -> Text
+indent = ("  " <>)
 
 -- | Print message and abort current process.
 abortCmd :: Text -> Text -> IO ()
@@ -101,12 +73,11 @@ abortCmd cmd msg = do
 ----------------------------------------------------------------------------
 
 printQuestion :: Text -> [Text] -> IO ()
+printQuestion question [] = putTextLn question
 printQuestion question (def:rest) = do
     let restSlash = T.intercalate "/" rest
-    putStrFlush question
-    boldDefault def
+    putStrFlush $ question <> boldDefault def
     putTextLn $ "/" <> restSlash
-printQuestion question [] = putTextLn question
 
 choose :: Text -> [Text] -> IO Text
 choose question choices = do
