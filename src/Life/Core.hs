@@ -37,9 +37,6 @@ newtype CommitMsg = CommitMsg
     { unCommitMsg :: Text
     } deriving stock (Show)
 
-instance IsString CommitMsg where
-    fromString = CommitMsg . toText
-
 -- | Git "master" branch constant.
 master :: Branch
 master = Branch "master"
