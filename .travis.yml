@@ -27,5 +27,21 @@ install:
 script:
   - stack test --no-terminal
 
+after_success:
+  - echo "Trying to deploy..."
+  - cd "$TRAVIS_BUILD_DIR"
+  - mv "$(stack path --local-install-root)/bin/life" "life-${TRAVIS_OS_NAME}"
+  - chmod +x "life-${TRAVIS_OS_NAME}"
+
+deploy:
+  - skip_cleanup: true
+    provider: releases
+    api_key: $GITHUB_OAUTH_TOKEN
+    file:
+      - "life-${TRAVIS_OS_NAME}"
+    on:
+      repo: kowainik/life
+      tags: true
+
 notifications:
   email: false
