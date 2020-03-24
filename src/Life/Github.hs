@@ -24,12 +24,16 @@ module Life.Github
 import Control.Exception (catch, throwIO)
 import Path (Abs, Dir, File, Path, Rel, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
+import Shellmet (($|))
 import System.IO.Error (IOError, isDoesNotExistError)
 
 import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLife)
 import Life.Core (Branch (..), CopyDirection (..), Owner (..), Repo (..), master)
 import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
-import Life.Shell (lifePath, relativeToHome, repoName, ($|))
+import Life.Path (lifePath, relativeToHome, repoName)
+
+import qualified Data.Text as Text
+
 
 ----------------------------------------------------------------------------
 -- VSC commands
@@ -113,7 +117,7 @@ checkRemoteSync (Branch branch) = do
 doesBranchExist :: Branch -> IO Bool
 doesBranchExist (Branch branch) = do
     r <- "git" $| ["ls-remote", "--heads", "origin", branch]
-    pure $ not (null r)
+    pure $ not (Text.null r)
 
 withSynced :: Branch -> IO a -> IO a
 withSynced branch@(Branch branchname) action = insideRepo $ do

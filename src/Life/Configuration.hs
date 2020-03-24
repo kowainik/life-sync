@@ -38,7 +38,7 @@ import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFil
 import Toml (TomlCodec, (.=))
 
 import Life.Core (Branch (..), master)
-import Life.Shell (lifePath, relativeToHome, repoName)
+import Life.Path (lifePath, relativeToHome, repoName)
 
 import qualified Data.Set as Set
 import qualified Data.Text as T

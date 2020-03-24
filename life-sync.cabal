@@ -66,12 +66,12 @@ library
                        Life.Core
                        Life.Github
                        Life.Message
-                       Life.Shell
                        Life.Main.Add
                        Life.Main.Init
                        Life.Main.Pull
                        Life.Main.Push
                        Life.Main.Remove
+                       Life.Path
 
   build-depends:       ansi-terminal
                      , bytestring
@@ -82,7 +82,8 @@ library
                      , path
                      , path-io
                      , process
-                     , text >= 1.2
+                     , shellmet ^>= 0.0.3.0
+                     , text ^>= 1.2
                      , tomland ^>= 1.2.1.0
                      , validation-selective ^>= 0.0.0.0
 
