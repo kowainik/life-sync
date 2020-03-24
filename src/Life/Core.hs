@@ -1,13 +1,21 @@
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Contains main data types used in the project.
+-}
+
 module Life.Core
     (
-    -- * Git and Github core
+      -- * Git and Github core
       Branch (..)
     , Owner  (..)
     , Repo   (..)
     , CommitMsg (..)
     , master
 
-    -- * File system logic
+      -- * File system logic
     , CopyDirection (..)
     , LifePath (..)
     ) where

@@ -1,30 +1,36 @@
--- | Contains configuration data type.
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Contains configuration data type — 'LifeConfiguration'.
+-}
 
 module Life.Configuration
-       ( LifeConfiguration (..)
-       , singleDirConfig
-       , singleFileConfig
-       , defaultLifeConfig
+    ( LifeConfiguration (..)
+    , singleDirConfig
+    , singleFileConfig
+    , defaultLifeConfig
 
-       , lifeConfigMinus
+    , lifeConfigMinus
 
---         -- * Parsing exceptions
---       , ParseLifeException (..)
+--      -- * Parsing exceptions
+--    , ParseLifeException (..)
 
-         -- * Lenses for 'LifeConfiguration'
-       , filesL
-       , directoriesL
-       , branchL
+      -- * Lenses for 'LifeConfiguration'
+    , filesL
+    , directoriesL
+    , branchL
 
-         -- * Parse 'LifeConfiguration' under @~/.life@
-       , parseHomeLife
-       , parseRepoLife
-       , parseLifeConfiguration
+      -- * Parse 'LifeConfiguration' under @~/.life@
+    , parseHomeLife
+    , parseRepoLife
+    , parseLifeConfiguration
 
-         -- * Render 'LifeConfiguration' under @~/.life@
-       , renderLifeConfiguration
-       , writeGlobalLife
-       ) where
+      -- * Render 'LifeConfiguration' under @~/.life@
+    , renderLifeConfiguration
+    , writeGlobalLife
+    ) where
 
 import Control.Monad.Catch (MonadThrow (..))
 import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))

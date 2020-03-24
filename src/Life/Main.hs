@@ -1,4 +1,9 @@
-{- | Main entry point for the @life@ executable.
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Main entry point for the @life@ executable.
 -}
 
 module Life.Main

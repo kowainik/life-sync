@@ -1,18 +1,24 @@
 {-# LANGUAGE TemplateHaskell #-}
 
--- | This module contains utility functions to work with shell.
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+This module contains utility functions to work with shell.
+-}
 
 module Life.Path
-       ( -- * Constants
-         lifePath
-       , repoName
+    ( -- * Constants
+      lifePath
+    , repoName
 
-         -- * Functions
-       , LifeExistence (..)
-       , createDirInHome
-       , relativeToHome
-       , whatIsLife
-       ) where
+      -- * Functions
+    , LifeExistence (..)
+    , createDirInHome
+    , relativeToHome
+    , whatIsLife
+    ) where
 
 import Path (Abs, Dir, File, Path, Rel, mkRelDir, mkRelFile, (</>))
 import Path.IO (createDirIfMissing, doesDirExist, doesFileExist, getHomeDir)

@@ -1,20 +1,29 @@
 {-# LANGUAGE MultiWayIf   #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Life.Message
-       ( prompt
-       , promptNonEmpty
-       , errorMessage
-       , warningMessage
-       , successMessage
-       , infoMessage
-       , skipMessage
-       , abortCmd
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
 
-         -- * Questions
-       , choose
-       , chooseYesNo
-       ) where
+Contains functions for colorful printing, prompt and other terminal related
+messages.
+-}
+
+module Life.Message
+    ( prompt
+    , promptNonEmpty
+    , errorMessage
+    , warningMessage
+    , successMessage
+    , infoMessage
+    , skipMessage
+    , abortCmd
+
+      -- * Questions
+    , choose
+    , chooseYesNo
+    ) where
 
 import Colourista (blue, bold, formatWith)
 import System.IO (hFlush)
@@ -22,6 +31,7 @@ import System.IO (hFlush)
 import qualified Colourista
 import qualified Data.Text as T
 import qualified Relude.Unsafe as Unsafe
+
 
 ----------------------------------------------------------------------------
 -- Ansi-terminal

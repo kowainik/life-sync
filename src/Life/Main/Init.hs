@@ -1,11 +1,17 @@
 {-# LANGUAGE TemplateHaskell #-}
 
--- | Contains function to create repository.
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Contains a function to create the main repository — @dotfiles@.
+-}
 
 module Life.Main.Init
-       ( lifeInit
-       , lifeInitQuestion
-       ) where
+    ( lifeInit
+    , lifeInitQuestion
+    ) where
 
 import Path (mkRelFile)
 import Path.IO (doesDirExist, doesFileExist)

@@ -1,25 +1,31 @@
--- | Utilities to work with GitHub repositories using "hub".
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Utilities to work with GitHub repositories using @hub@.
+-}
 
 module Life.Github
-       (
-         -- * Repository utils
-         checkRemoteSync
-       , cloneRepo
-       , createNewBranch
-       , doesBranchExist
-       , insideRepo
-       , withSynced
+    (
+      -- * Repository utils
+      checkRemoteSync
+    , cloneRepo
+    , createNewBranch
+    , doesBranchExist
+    , insideRepo
+    , withSynced
 
-         -- * Repository manipulation commands
-       , copyLife
-       , addToRepo
-       , createRepository
-       , pullUpdateFromRepo
-       , removeFromRepo
-       , updateDotfilesRepo
-       , updateFromRepo
-       , getUserLogin
-       ) where
+      -- * Repository manipulation commands
+    , copyLife
+    , addToRepo
+    , createRepository
+    , pullUpdateFromRepo
+    , removeFromRepo
+    , updateDotfilesRepo
+    , updateFromRepo
+    , getUserLogin
+    ) where
 
 import Control.Exception (catch, throwIO)
 import Path (Abs, Dir, File, Path, Rel, toFilePath, (</>))

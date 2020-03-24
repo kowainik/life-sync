@@ -1,8 +1,14 @@
--- | Functions to update remote repository
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Functions to update the remote repository.
+-}
 
 module Life.Main.Push
-       ( lifePush
-       ) where
+    ( lifePush
+    ) where
 
 import Path (Abs, Path, Rel, toFilePath, (</>))
 import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)

@@ -1,31 +1,26 @@
-Change log
-==========
+# Changelog
 
-life-sync uses [PVP Versioning][1].
+`life-sync` uses [PVP Versioning][1].
 The change log is available [on GitHub][2].
 
-
-# 1.0.2
+## 1.0.2
 
 * [#42](https://github.com/kowainik/life-sync/issues/42):
   Create newtype `Branch`.
-
 * [#48](https://github.com/kowainik/life-sync/issues/48):
   Fix minor bug with broken `life add -d`.
-
 * [#49](https://github.com/kowainik/life-sync/issues/49):
   Core module with internal types.
-
 * [#59](https://github.com/kowainik/life-sync/issues/59):
   Bump to relude-0.4.0.
   Bump to GHC-8.4.4.
 
 
-# 1.0.1
+## 1.0.1
 
 * Switch to `relude`.
 
-# 1.0
+## 1.0
 
 * Initially created.
 

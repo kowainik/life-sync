@@ -1,10 +1,16 @@
 {-# LANGUAGE Rank2Types #-}
 
--- | Functions to add file/directory to your life.
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Functions to add file/directory to your life.
+-}
 
 module Life.Main.Add
-       ( lifeAdd
-       ) where
+    ( lifeAdd
+    ) where
 
 import Path (Abs, Dir, File, Path, Rel, parent, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, getHomeDir,
