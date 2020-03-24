@@ -1,6 +1,12 @@
 {-# LANGUAGE ApplicativeDo #-}
 
--- | Command line options for Importify
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Command line options for @life@.
+-}
 
 module Life.Cli
     ( LifeCommand (..)

@@ -4,12 +4,12 @@ version:             1.0.2
 description:         Synchronize personal configs across multiple machines
 homepage:            https://github.com/kowainik/life-sync
 bug-reports:         https://github.com/kowainik/life-sync/issues
-license:             MIT
+license:             MPL-2.0
 license-file:        LICENSE
 author:              Dmitrii Kovanikov, Veronika Romashkina
 maintainer:          Kowainik <xrom.xkov@gmail.com>
 copyright:           2018-2020 Kowainik
-category:            Configuration
+category:            Configuration, CLI, CLI Tool, Development
 stability:           experimental
 build-type:          Simple
 extra-doc-files:     README.md

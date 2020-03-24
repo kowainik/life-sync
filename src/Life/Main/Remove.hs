@@ -1,10 +1,16 @@
 {-# LANGUAGE Rank2Types #-}
 
--- | Functions to remove from your life.
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Functions to remove from your @life@ repository.
+-}
 
 module Life.Main.Remove
-       ( lifeRemove
-       ) where
+    ( lifeRemove
+    ) where
 
 import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)

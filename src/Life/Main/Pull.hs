@@ -1,8 +1,14 @@
--- | Command to update local state from remote state.
+{- |
+Copyright:  (c) 2017-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
+Command to update the local state from the remote state.
+-}
 
 module Life.Main.Pull
-       ( lifePull
-       ) where
+    ( lifePull
+    ) where
 
 import Path (Dir, File, Path, Rel)
 
