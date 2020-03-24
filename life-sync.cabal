@@ -63,21 +63,24 @@ library
   import:              common-options
   hs-source-dirs:      src
 
-  exposed-modules:     Life.Configuration
+  exposed-modules:     Life.Cli
+                       Life.Configuration
                        Life.Core
                        Life.Github
+                       Life.Main
+                         Life.Main.Add
+                         Life.Main.Init
+                         Life.Main.Pull
+                         Life.Main.Push
+                         Life.Main.Remove
                        Life.Message
-                       Life.Main.Add
-                       Life.Main.Init
-                       Life.Main.Pull
-                       Life.Main.Push
-                       Life.Main.Remove
                        Life.Path
 
   build-depends:       bytestring
                      , colourista ^>= 0.0.0.0
                      , containers
                      , exceptions
+                     , optparse-applicative ^>= 0.15
                      , path
                      , path-io
                      , process
@@ -90,13 +93,8 @@ executable life
   import:              common-options
   hs-source-dirs:      app
   main-is:             Main.hs
-  other-modules:       Options
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-
   build-depends:       life-sync
-                     , containers
-                     , optparse-applicative
-                     , path
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
 
 test-suite life-sync-test
   import:              common-options

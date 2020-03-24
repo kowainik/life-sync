@@ -1,20 +1,20 @@
-{-# LANGUAGE ApplicativeDo       #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ApplicativeDo #-}
 
 -- | Command line options for Importify
 
-module Options
-       ( LifeCommand (..)
-       , PathOptions (..)
-       , PullOptions (..)
+module Life.Cli
+    ( LifeCommand (..)
+    , PathOptions (..)
+    , PullOptions (..)
 
-       , parseCommand
-       ) where
+    , parseCommand
+    ) where
 
 import Options.Applicative (Parser, ParserInfo, command, execParser, fullDesc, help, helper, info,
                             long, metavar, progDesc, short, strOption, subparser)
 
 import Life.Core (LifePath (..), Owner (..))
+
 
 -- | Commands to execute
 data LifeCommand
