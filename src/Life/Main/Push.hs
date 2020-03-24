@@ -1,17 +1,15 @@
-{-# LANGUAGE TupleSections #-}
-
 -- | Functions to update remote repository
 
 module Life.Main.Push
        ( lifePush
        ) where
 
-import Lens.Micro.Platform ((^.))
 import Path (Abs, Path, Rel, toFilePath, (</>))
 import Path.IO (doesDirExist, doesFileExist, removeDirRecur, removeFile)
+import Relude.Extra.Lens ((^.))
 import Validation (Validation (..))
 
-import Life.Configuration (LifeConfiguration (..), directories, files, lifeConfigMinus,
+import Life.Configuration (LifeConfiguration (..), directoriesL, filesL, lifeConfigMinus,
                            parseHomeLife, parseRepoLife)
 import Life.Core (master)
 import Life.Github (updateDotfilesRepo, withSynced)
@@ -35,8 +33,9 @@ lifePush = whatIsLife >>= \case
         -- check that all from .life exist
         globalConf <- parseHomeLife
         checkLife globalConf >>= \case
-            Failure msgs -> abortCmd "push" $ "Following files/directories are missing:\n"
-                                           <> Text.intercalate "\n" msgs
+            Failure msgs -> abortCmd "push" $
+                "Following files/directories are missing:\n"
+                <> Text.intercalate "\n" msgs
             Success _ -> do
                 -- first, find the difference between repo .life and global .life
                 repoConf <- parseRepoLife
@@ -52,8 +51,8 @@ lifePush = whatIsLife >>= \case
     -- | checks if all the files/dirs from global .life exist.
     checkLife :: LifeConfiguration -> IO (Validation [Text] LifeConfiguration)
     checkLife lf = do
-        eFiles <- traverse (withExist doesFileExist) $ Set.toList (lf ^. files)
-        eDirs  <- traverse (withExist doesDirExist) $ Set.toList (lf ^. directories)
+        eFiles <- traverse (withExist doesFileExist) $ Set.toList (lf ^. filesL)
+        eDirs  <- traverse (withExist doesDirExist) $ Set.toList (lf ^. directoriesL)
         pure $ LifeConfiguration
             <$> checkPaths eFiles
             <*> checkPaths eDirs
@@ -71,7 +70,7 @@ lifePush = whatIsLife >>= \case
     -- | removes all redundant files from repo folder.
     removeAll :: LifeConfiguration -> IO ()
     removeAll conf = do
-        for_ (conf ^. files) $ \f ->
+        for_ (conf ^. filesL) $ \f ->
             relativeToHome (repoName </> f) >>= removeFile
-        for_ (conf ^. directories) $ \d ->
+        for_ (conf ^. directoriesL) $ \d ->
             relativeToHome (repoName </> d) >>= removeDirRecur

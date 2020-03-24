@@ -1,9 +1,3 @@
-{-# LANGUAGE DataKinds              #-}
-{-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE ScopedTypeVariables    #-}
-{-# LANGUAGE TemplateHaskell        #-}
-
 -- | Contains configuration data type.
 
 module Life.Configuration
@@ -18,8 +12,9 @@ module Life.Configuration
 --       , ParseLifeException (..)
 
          -- * Lenses for 'LifeConfiguration'
-       , files
-       , directories
+       , filesL
+       , directoriesL
+       , branchL
 
          -- * Parse 'LifeConfiguration' under @~/.life@
        , parseHomeLife
@@ -33,8 +28,8 @@ module Life.Configuration
 
 import Control.Monad.Catch (MonadThrow (..))
 import Fmt (indentF, unlinesF, (+|), (|+))
-import Lens.Micro.Platform (makeFields, (.~), (^.))
 import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))
+import Relude.Extra.Lens (Lens', lens, (.~), (^.))
 import Toml (TomlCodec, (.=))
 
 import Life.Core (Branch (..), master)
@@ -45,17 +40,31 @@ import qualified Data.Text as T
 import qualified Text.Show as Show
 import qualified Toml
 
-----------------------------------------------------------------------------
--- Life Configuration data type with lenses
-----------------------------------------------------------------------------
 
+-- | The configurations data type.
 data LifeConfiguration = LifeConfiguration
-     { lifeConfigurationFiles       :: Set (Path Rel File)
-     , lifeConfigurationDirectories :: Set (Path Rel Dir)
-     , lifeConfigurationBranch      :: Last Branch
+     { lifeConfigurationFiles       :: !(Set (Path Rel File))
+     , lifeConfigurationDirectories :: !(Set (Path Rel Dir))
+     , lifeConfigurationBranch      :: !(Last Branch)
      } deriving stock (Show, Eq)
 
-makeFields ''LifeConfiguration
+-- | Lens for 'lifeConfigurationFiles'.
+filesL :: Lens' LifeConfiguration (Set (Path Rel File))
+filesL = lens
+    lifeConfigurationFiles
+    (\config newFiles -> config {lifeConfigurationFiles = newFiles})
+
+-- | Lens for 'lifeConfigurationDirectories'.
+directoriesL :: Lens' LifeConfiguration (Set (Path Rel Dir))
+directoriesL = lens
+    lifeConfigurationDirectories
+    (\config newDirs -> config {lifeConfigurationDirectories = newDirs})
+
+-- | Lens for 'lifeConfigurationBranch'.
+branchL :: Lens' LifeConfiguration (Last Branch)
+branchL = lens
+    lifeConfigurationBranch
+    (\config newBr -> config {lifeConfigurationBranch = newBr})
 
 ----------------------------------------------------------------------------
 -- Algebraic instances and utilities
@@ -63,34 +72,42 @@ makeFields ''LifeConfiguration
 
 instance Semigroup LifeConfiguration where
     life1 <> life2 = LifeConfiguration
-        { lifeConfigurationFiles       = life1^.files <> life2^.files
-        , lifeConfigurationDirectories = life1^.directories <> life2^.directories
-        , lifeConfigurationBranch      = life1^.branch <> life2^.branch
+        { lifeConfigurationFiles       = (life1 ^. filesL) <> (life2 ^. filesL)
+        , lifeConfigurationDirectories = (life1 ^. directoriesL) <> (life2 ^. directoriesL)
+        , lifeConfigurationBranch      = (life1 ^. branchL) <> (life2 ^. branchL)
         }
 
 instance Monoid LifeConfiguration where
     mempty  = LifeConfiguration mempty mempty mempty
     mappend = (<>)
 
+-- | The defaulting 'LifeConfiguration', with the default @master@ branch.
 defaultLifeConfig :: LifeConfiguration
-defaultLifeConfig = LifeConfiguration mempty mempty (Last $ Just master)
+defaultLifeConfig = LifeConfiguration
+    { lifeConfigurationFiles       = mempty
+    , lifeConfigurationDirectories = mempty
+    , lifeConfigurationBranch      = Last $ Just master
+    }
 
+-- | Creates a 'LifeConfiguration' with the given file.
 singleFileConfig :: Path Rel File -> LifeConfiguration
-singleFileConfig file = mempty & files .~ one file
+singleFileConfig file = mempty & filesL .~ one file
 
+-- | Creates a 'LifeConfiguration' with the given folder.
 singleDirConfig :: Path Rel Dir -> LifeConfiguration
-singleDirConfig dir = mempty & directories .~ one dir
+singleDirConfig dir = mempty & directoriesL .~ one dir
 
 ----------------------------------------------------------------------------
 -- LifeConfiguration difference
 ----------------------------------------------------------------------------
 
-lifeConfigMinus :: LifeConfiguration -- ^ repo .life config
-                -> LifeConfiguration -- ^ global config
-                -> LifeConfiguration -- ^ configs that are not in global
+lifeConfigMinus
+    :: LifeConfiguration -- ^ Repository @.life@ configuration
+    -> LifeConfiguration -- ^ Global configuration
+    -> LifeConfiguration -- ^ Configuration that is not in global
 lifeConfigMinus dotfiles global = LifeConfiguration
-    (Set.difference (dotfiles ^. files) (global ^. files))
-    (Set.difference (dotfiles ^. directories) (global ^. directories))
+    (Set.difference (dotfiles ^. filesL) (global ^. filesL))
+    (Set.difference (dotfiles ^. directoriesL) (global ^. directoriesL))
     (Last $ Just master)
 
 ----------------------------------------------------------------------------
