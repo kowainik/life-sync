@@ -40,7 +40,7 @@ deploy:
     file:
       - "life-${TRAVIS_OS_NAME}"
     on:
-      repo: kowainik/life
+      repo: kowainik/life-sync
       tags: true
 
 notifications:
