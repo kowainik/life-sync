@@ -6,12 +6,12 @@ module Life.Main.Add
        ( lifeAdd
        ) where
 
-import Lens.Micro.Platform (Lens', (%~))
 import Path (Abs, Dir, File, Path, Rel, parent, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, doesDirExist, doesFileExist, ensureDir, getHomeDir,
                 makeRelative, resolveDir, resolveFile)
+import Relude.Extra.Lens (Lens', (%~))
 
-import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife, writeGlobalLife)
+import Life.Configuration (LifeConfiguration, directoriesL, filesL, parseHomeLife, writeGlobalLife)
 import Life.Core (LifePath (..), master)
 import Life.Github (addToRepo, withSynced)
 import Life.Main.Init (lifeInitQuestion)
@@ -42,28 +42,30 @@ lifeAdd lPath = whatIsLife >>= \case
                 filePath <- resolveFile homeDirPath path
                 whenM (doesFileExist filePath) $ do
                     relativeFile <- makeRelative homeDirPath filePath
-                    resolveConfiguration files checkEqualFiles copyFileWithDir relativeFile
+                    resolveConfiguration filesL checkEqualFiles copyFileWithDir relativeFile
 
             (Dir path)  -> do
                 dirPath <- resolveDir homeDirPath path
                 whenM (doesDirExist dirPath) $ do
                     relativeDir <- makeRelative homeDirPath dirPath
-                    resolveConfiguration directories checkEqualDirs copyDirRecur relativeDir
+                    resolveConfiguration directoriesL checkEqualDirs copyDirRecur relativeDir
 
             -- We didn't find the file
         errorMessage "The file/directory doesn't exist" >> exitFailure
 
-resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
-                     -> (Path Rel t -> IO Bool)
-                     -> (Path Abs t -> Path Abs t -> IO ())
-                     -> Path Rel t
-                     -> IO ()
+resolveConfiguration
+    :: Lens' LifeConfiguration (Set (Path Rel t))
+    -> (Path Rel t -> IO Bool)
+    -> (Path Abs t -> Path Abs t -> IO ())
+    -> Path Rel t
+    -> IO ()
 resolveConfiguration confLens checkContent copyFun path = do
     configuration <- parseHomeLife
     let newConfiguration = configuration & confLens %~ Set.insert path
 
     isSameAsInRepo <- checkContent path
-    if isSameAsInRepo then do
+    if isSameAsInRepo
+    then do
         let pathText = toText $ toFilePath path
         infoMessage $ "Path " <> pathText <> " is already latest version in repository"
     else do
@@ -78,19 +80,19 @@ checkEqualFiles path = do
     repoFilePath <- relativeToHome (repoName </> path)
 
     isRepoFile <- doesFileExist repoFilePath
-    if isRepoFile then do
+    if isRepoFile
+    then do
         originContent <- readFileLBS $ toFilePath homeFilePath
         repoContent <- readFileLBS $ toFilePath repoFilePath
 
         pure $ originContent == repoContent
-    else
-        pure False
+    else pure False
 
 checkEqualDirs :: Path Rel Dir -> IO Bool
 checkEqualDirs _ = do
     warningMessage "TODO: check directories to be equal"
     pure False
 
--- | Just like 'copyFile' but also creates directory for second file.
+-- | Just like 'copyFile' but also creates directory for the second file.
 copyFileWithDir :: Path Abs File -> Path Abs File -> IO ()
 copyFileWithDir from to = ensureDir (parent to) >> copyFile from to

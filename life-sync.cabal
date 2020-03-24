@@ -26,6 +26,7 @@ common common-options
 
   mixins:              base hiding (Prelude)
                      , relude (Relude as Prelude
+                              , Relude.Extra.Lens
                               , Relude.Unsafe
                               )
 
@@ -78,7 +79,6 @@ library
                      , containers
                      , exceptions
                      , fmt
-                     , microlens-platform
                      , path
                      , path-io
                      , process

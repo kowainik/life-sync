@@ -6,11 +6,11 @@ module Life.Main.Remove
        ( lifeRemove
        ) where
 
-import Lens.Micro.Platform (Lens', (%~))
 import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
+import Relude.Extra.Lens (Lens', (%~))
 
-import Life.Configuration (LifeConfiguration, directories, files, parseHomeLife, writeGlobalLife)
+import Life.Configuration (LifeConfiguration, directoriesL, filesL, parseHomeLife, writeGlobalLife)
 import Life.Core (LifePath (..), master)
 import Life.Github (removeFromRepo, withSynced)
 import Life.Message (abortCmd, warningMessage)
@@ -32,21 +32,22 @@ lifeRemove lPath = whatIsLife >>= \case
         case lPath of
             (File path) -> do
                 filePath <- resolveFile homeDirPath path >>= makeRelative homeDirPath
-                resolveConfiguration files removeFile filePath
+                resolveConfiguration filesL removeFile filePath
             (Dir path)  -> do
                 dirPath <- resolveDir homeDirPath path >>= makeRelative homeDirPath
-                resolveConfiguration directories removeDirRecur dirPath
+                resolveConfiguration directoriesL removeDirRecur dirPath
 
-resolveConfiguration :: Lens' LifeConfiguration (Set (Path Rel t))
-                     -> (Path Abs t -> IO ()) -- ^ function to remove object
-                     -> Path Rel t
-                     -> IO ()
+resolveConfiguration
+    :: Lens' LifeConfiguration (Set (Path Rel t))
+    -> (Path Abs t -> IO ()) -- ^ function to remove object
+    -> Path Rel t
+    -> IO ()
 resolveConfiguration confLens removeFun path = do
     configuration <- parseHomeLife
 
     let newConfiguration = configuration & confLens %~ Set.delete path
     if configuration == newConfiguration
-    then warningMessage "File or directory is not in tracked" >> exitFailure
+    then warningMessage "File or directory is not tracked" >> exitFailure
     else do
         writeGlobalLife newConfiguration
         removeFromRepo removeFun path
