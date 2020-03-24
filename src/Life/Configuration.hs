@@ -27,7 +27,6 @@ module Life.Configuration
        ) where
 
 import Control.Monad.Catch (MonadThrow (..))
-import Fmt (indentF, unlinesF, (+|), (|+))
 import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))
 import Relude.Extra.Lens (Lens', lens, (.~), (^.))
 import Toml (TomlCodec, (.=))
@@ -148,17 +147,20 @@ renderLifeConfiguration printIfEmpty LifeConfiguration{..} = mconcat $
     render :: Text -> Set (Path b t) -> Maybe Text
     render key paths = do
         let prefix = key <> " = "
-        let array  = renderStringArray (T.length prefix) (map show $ toList paths)
-
+        let array  = renderStringArray $ map show $ toList paths
         if not printIfEmpty && null paths
         then Nothing
         else Just $ prefix <> array
 
-    renderStringArray :: Int -> [String] -> Text
-    renderStringArray _ []     = "[]"
-    renderStringArray n (x:xs) = "[ " +| x |+ "\n"
-                              +| indentF n (unlinesF (map (", " ++) xs ++ ["]"]))
-                              |+ ""
+    renderStringArray :: [Text] -> Text
+    renderStringArray = \case
+        [] -> "[]"
+        [x] -> "[" <> x <> "]"
+        l -> mconcat
+            [ "\n    [ "
+            , T.intercalate "\n    , " l
+            , "\n    ]"
+            ]
 
 writeGlobalLife :: LifeConfiguration -> IO ()
 writeGlobalLife config = do

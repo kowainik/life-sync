@@ -78,7 +78,6 @@ library
                      , colourista ^>= 0.0.0.0
                      , containers
                      , exceptions
-                     , fmt
                      , path
                      , path-io
                      , process
@@ -114,3 +113,4 @@ test-suite life-sync-test
                      , hspec ^>= 2.7.1
                      , hspec-hedgehog ^>= 0.0.1.1
                      , path
+                     , text
