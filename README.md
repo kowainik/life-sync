@@ -70,6 +70,18 @@ $ brew tap kowainik/tap
 $ brew install life-sync
 ```
 
+### Ubuntu
+
+If you are on Ubuntu, you can get `life-sync` from Kowainik's PPA.
+
+You need to run the following commands for that:
+
+```shell
+$ sudo add-apt-repository ppa:kowainik/life-sync
+$ sudo apt update
+$ sudo apt intsall life-sync
+```
+
 ### Setup
 
 You can turn on bash auto-completion by running the following command:
