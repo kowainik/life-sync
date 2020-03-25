@@ -55,7 +55,7 @@ $ cabal install life-sync
 or
 
 ```shell
-$ stack install life-sync-1.0
+$ stack install life-sync
 ```
 
 ### Homebrew
@@ -79,7 +79,7 @@ You need to run the following commands for that:
 ```shell
 $ sudo add-apt-repository ppa:kowainik/life-sync
 $ sudo apt update
-$ sudo apt intsall life-sync
+$ sudo apt install life-sync
 ```
 
 ### Setup
