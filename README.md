@@ -6,7 +6,7 @@
 [![Stackage LTS](http://stackage.org/package/life-sync/badge/lts)](http://stackage.org/lts/package/life-sync)
 [![Stackage Nightly](http://stackage.org/package/life-sync/badge/nightly)](http://stackage.org/nightly/package/life-sync)
 
-`life-sync` is a CLI tool that makes it easier to synchronize a repository of 
+`life-sync` is a CLI tool that makes it easier to synchronize a repository of
 personal config files across multiple machines.
 
 ## Motivation
@@ -41,6 +41,11 @@ changes to different files.
 
 ## Installation
 
+There are several ways to install `life` on your machine.
+Here are detailed instructions on different approaches.
+
+### From Hackage/Stackage
+
 Install with one simple command:
 
 ```shell
@@ -52,6 +57,20 @@ or
 ```shell
 $ stack install life-sync-1.0
 ```
+
+### Homebrew
+
+If you are on MacOS, you can get `life-sync` using
+[Homebrew](https://brew.sh/) Kowainik's Tap.
+
+You need to run the following commands for that:
+
+```shell
+$ brew tap kowainik/tap
+$ brew install life-sync
+```
+
+### Setup
 
 You can turn on bash auto-completion by running the following command:
 
