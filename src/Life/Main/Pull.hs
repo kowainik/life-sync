@@ -10,13 +10,14 @@ module Life.Main.Pull
     ( lifePull
     ) where
 
+import Colourista (warningMessage)
 import Path (Dir, File, Path, Rel)
 
 import Life.Configuration (LifeConfiguration (..), defaultLifeConfig)
 import Life.Core (Owner)
 import Life.Github (cloneRepo, pullUpdateFromRepo, updateFromRepo)
 import Life.Main.Init (lifeInitQuestion)
-import Life.Message (abortCmd, choose, warningMessage)
+import Life.Message (abortCmd, choose)
 import Life.Path (LifeExistence (..), whatIsLife)
 
 
@@ -30,8 +31,9 @@ lifePull owner withoutFiles withoutDirs = whatIsLife >>= \case
     initOrPull :: IO ()
     initOrPull = do
         warningMessage ".life file and dotfiles repo not found"
-        action <- choose "Do you want to (F)etch existing repo, (I)nit from scratch or (A)bort operation?"
-                         ["f", "i", "a"]
+        action <- choose
+            "Do you want to (F)etch existing repo, (I)nit from scratch or (A)bort operation?"
+            ("f" :|  ["i", "a"])
         case action of
             "f" -> clone >> update
             "i" -> lifeInitQuestion "pull" pass

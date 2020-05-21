@@ -13,11 +13,6 @@ messages.
 module Life.Message
     ( prompt
     , promptNonEmpty
-    , errorMessage
-    , warningMessage
-    , successMessage
-    , infoMessage
-    , skipMessage
     , abortCmd
 
       -- * Questions
@@ -25,12 +20,10 @@ module Life.Message
     , chooseYesNo
     ) where
 
-import Colourista (blue, bold, formatWith)
+import Colourista (blue, bold, errorMessage, formatWith, warningMessage)
 import System.IO (hFlush)
 
-import qualified Colourista
 import qualified Data.Text as T
-import qualified Relude.Unsafe as Unsafe
 
 
 ----------------------------------------------------------------------------
@@ -60,17 +53,6 @@ promptNonEmpty = do
 boldDefault :: Text -> Text
 boldDefault message = formatWith [bold] $ " [" <> message <> "]"
 
-errorMessage, warningMessage, successMessage, infoMessage, skipMessage :: Text -> IO ()
-errorMessage   = Colourista.errorMessage   . indent
-warningMessage = Colourista.warningMessage . indent
-successMessage = Colourista.successMessage . indent
-infoMessage    = Colourista.infoMessage    . indent
-skipMessage    = Colourista.skipMessage    . indent
-
--- | Add 2 spaces in front.
-indent :: Text -> Text
-indent = ("  " <>)
-
 -- | Print message and abort current process.
 abortCmd :: Text -> Text -> IO ()
 abortCmd cmd msg = do
@@ -89,17 +71,19 @@ printQuestion question (def:rest) = do
     putStrFlush $ question <> boldDefault def
     putTextLn $ "/" <> restSlash
 
-choose :: Text -> [Text] -> IO Text
+choose :: Text -> NonEmpty Text -> IO Text
 choose question choices = do
-    printQuestion question choices
+    printQuestion question $ toList choices
     answer <- prompt
-    if | T.null answer -> pure (Unsafe.head choices)
+    if | T.null answer -> pure (head choices)
        | T.toLower answer `elem` choices -> pure answer
        | otherwise -> do
            errorMessage "This wasn't a valid choice."
            choose question choices
 
-data Answer = Y | N
+data Answer
+    = Y
+    | N
 
 yesOrNo :: Text -> Maybe Answer
 yesOrNo (T.toLower -> answer )

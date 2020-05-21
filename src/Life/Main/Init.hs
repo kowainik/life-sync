@@ -13,15 +13,16 @@ module Life.Main.Init
     , lifeInitQuestion
     ) where
 
+import Colourista (infoMessage, skipMessage, successMessage, warningMessage)
 import Path (mkRelFile)
 import Path.IO (doesDirExist, doesFileExist)
+
 
 import Life.Configuration (LifeConfiguration (..), parseHomeLife, renderLifeConfiguration,
                            singleFileConfig, writeGlobalLife)
 import Life.Core (CopyDirection (..), Owner (..), Repo (..), master)
 import Life.Github (copyLife, createRepository, insideRepo)
-import Life.Message (abortCmd, chooseYesNo, infoMessage, promptNonEmpty, skipMessage,
-                     successMessage, warningMessage)
+import Life.Message (abortCmd, chooseYesNo, promptNonEmpty)
 import Life.Path (LifeExistence (..), createDirInHome, lifePath, relativeToHome, repoName,
                   whatIsLife)
 

@@ -13,14 +13,15 @@ import System.FilePath (pathSeparator, (</>))
 import Test.Hspec (Spec, describe, it, shouldBe)
 import Test.Hspec.Hedgehog (hedgehog)
 
-import Life.Configuration (LifeConfiguration (..), directoriesL, filesL, parseLifeConfiguration,
-                           renderLifeConfiguration)
+import Life.Configuration (LifeConfiguration (..), corpseConfiguationCodec, directoriesL, filesL,
+                           renderLifeConfiguration, resurrect)
 import Life.Core (master)
 
 import qualified Data.Set as Set
 import qualified Data.Text as T
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
+import qualified Toml
 
 
 configurationSpec :: Spec
@@ -70,7 +71,9 @@ configurationPropertySpec = describe "Property Tests" $
 parseRenderSpec :: PropertyT IO ()
 parseRenderSpec = hedgehog $ do
     cfg <- forAll genLifeConfiguration
-    tripping cfg (renderLifeConfiguration True) (parseLifeConfiguration @Maybe)
+    tripping cfg
+        (renderLifeConfiguration True)
+        (\t -> rightToMaybe (Toml.decode corpseConfiguationCodec t) >>= resurrect)
 
 genLifeConfiguration :: Gen LifeConfiguration
 genLifeConfiguration = do

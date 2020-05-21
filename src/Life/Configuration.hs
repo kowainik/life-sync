@@ -14,6 +14,11 @@ module Life.Configuration
 
     , lifeConfigMinus
 
+      -- Config
+    , CorpseConfiguration (..)
+    , corpseConfiguationCodec
+    , resurrect
+
 --      -- * Parsing exceptions
 --    , ParseLifeException (..)
 
@@ -25,7 +30,6 @@ module Life.Configuration
       -- * Parse 'LifeConfiguration' under @~/.life@
     , parseHomeLife
     , parseRepoLife
-    , parseLifeConfiguration
 
       -- * Render 'LifeConfiguration' under @~/.life@
     , renderLifeConfiguration
@@ -33,7 +37,7 @@ module Life.Configuration
     ) where
 
 import Control.Monad.Catch (MonadThrow (..))
-import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, toFilePath, (</>))
+import Path (Dir, File, Path, Rel, fromAbsFile, parseRelDir, parseRelFile, (</>))
 import Relude.Extra.Lens (Lens', lens, (.~), (^.))
 import Toml (TomlCodec, (.=))
 
@@ -42,7 +46,6 @@ import Life.Path (lifePath, relativeToHome, repoName)
 
 import qualified Data.Set as Set
 import qualified Data.Text as T
-import qualified Text.Show as Show
 import qualified Toml
 
 
@@ -124,8 +127,8 @@ data CorpseConfiguration = CorpseConfiguration
     , corpseDirectories :: [FilePath]
     }
 
-corpseConfiguationT :: TomlCodec CorpseConfiguration
-corpseConfiguationT = CorpseConfiguration
+corpseConfiguationCodec :: TomlCodec CorpseConfiguration
+corpseConfiguationCodec = CorpseConfiguration
     <$> Toml.arrayOf Toml._String "files"       .= corpseFiles
     <*> Toml.arrayOf Toml._String "directories" .= corpseDirectories
 
@@ -142,9 +145,10 @@ resurrect CorpseConfiguration{..} = do
 
 -- TODO: should tomland one day support this?...
 -- | Converts 'LifeConfiguration' into TOML file.
-renderLifeConfiguration :: Bool  -- ^ True to see empty entries in output
-                        -> LifeConfiguration
-                        -> Text
+renderLifeConfiguration
+    :: Bool  -- ^ True to see empty entries in output
+    -> LifeConfiguration
+    -> Text
 renderLifeConfiguration printIfEmpty LifeConfiguration{..} = mconcat $
        maybeToList (render "directories" lifeConfigurationDirectories)
     ++ [ "\n" ]
@@ -177,15 +181,11 @@ writeGlobalLife config = do
 -- Life configuration parsing
 ----------------------------------------------------------------------------
 
-parseLifeConfiguration :: MonadThrow m => Text -> m LifeConfiguration
-parseLifeConfiguration tomlText = case Toml.decode corpseConfiguationT tomlText of
-    Left err  -> throwM $ LoadTomlException (toFilePath lifePath) $ Toml.prettyException err
-    Right cfg -> resurrect cfg
-
 parseLife :: Path Rel File -> IO LifeConfiguration
-parseLife path = relativeToHome path
-             >>= readFileText . fromAbsFile
-             >>= parseLifeConfiguration
+parseLife path =
+    relativeToHome path
+    >>= Toml.decodeFile corpseConfiguationCodec . fromAbsFile
+    >>= resurrect
 
 -- | Reads 'LifeConfiguration' from @~\/.life@ file.
 parseHomeLife :: IO LifeConfiguration
@@ -194,10 +194,3 @@ parseHomeLife = parseLife lifePath
 -- | Reads 'LifeConfiguration' from @~\/dotfiles\/.life@ file.
 parseRepoLife :: IO LifeConfiguration
 parseRepoLife = parseLife (repoName </> lifePath)
-
-data LoadTomlException = LoadTomlException FilePath Text
-
-instance Show.Show LoadTomlException where
-    show (LoadTomlException filePath msg) = "Couldnt parse file " ++ filePath ++ ": " ++ show msg
-
-instance Exception LoadTomlException
