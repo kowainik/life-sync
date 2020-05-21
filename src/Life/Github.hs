@@ -27,6 +27,7 @@ module Life.Github
     , getUserLogin
     ) where
 
+import Colourista (errorMessage, infoMessage, warningMessage)
 import Control.Exception (catch, throwIO)
 import Path (Abs, Dir, File, Path, Rel, toFilePath, (</>))
 import Path.IO (copyDirRecur, copyFile, getHomeDir, withCurrentDir)
@@ -35,7 +36,7 @@ import System.IO.Error (IOError, isDoesNotExistError)
 
 import Life.Configuration (LifeConfiguration (..), lifeConfigMinus, parseRepoLife)
 import Life.Core (Branch (..), CommitMsg (..), CopyDirection (..), Owner (..), Repo (..), master)
-import Life.Message (chooseYesNo, errorMessage, infoMessage, warningMessage)
+import Life.Message (chooseYesNo)
 import Life.Path (lifePath, relativeToHome, repoName)
 
 import qualified Data.Text as Text

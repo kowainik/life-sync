@@ -12,6 +12,7 @@ module Life.Main.Remove
     ( lifeRemove
     ) where
 
+import Colourista (warningMessage)
 import Path (Abs, Path, Rel)
 import Path.IO (getHomeDir, makeRelative, removeDirRecur, removeFile, resolveDir, resolveFile)
 import Relude.Extra.Lens (Lens', (%~))
@@ -19,7 +20,7 @@ import Relude.Extra.Lens (Lens', (%~))
 import Life.Configuration (LifeConfiguration, directoriesL, filesL, parseHomeLife, writeGlobalLife)
 import Life.Core (LifePath (..), master)
 import Life.Github (removeFromRepo, withSynced)
-import Life.Message (abortCmd, warningMessage)
+import Life.Message (abortCmd)
 import Life.Path (LifeExistence (..), whatIsLife)
 
 import qualified Data.Set as Set

@@ -3,6 +3,20 @@
 `life-sync` uses [PVP Versioning][1].
 The change log is available [on GitHub][2].
 
+## 1.1.1.0 — May 21, 2020
+
+* [#101](https://github.com/kowainik/life-sync/issues/101):
+  Support GHC-8.10.1.
+* [#98](https://github.com/kowainik/life-sync/issues/98):
+  Use `relude-0.7.0.0`.
+* [#100](https://github.com/kowainik/life-sync/issues/100):
+  Use `tomland-1.3.0.0`.
+* [#97](https://github.com/kowainik/life-sync/issues/97):
+  Use `validation-selective-0.1.0.0`.
+* [#96](https://github.com/kowainik/life-sync/issues/97):
+  Use `colourista-0.1.0.0`.
+* Use `path-0.7.0`.
+
 ## 1.1.0.0 — Mar 25, 2020
 
 * [#36](https://github.com/kowainik/life-sync/issues/36):
